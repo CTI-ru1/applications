@@ -1,0 +1,235 @@
+<?php
+
+/**
+* @file
+* A block module that displays recent blog and forum posts.
+*/
+
+/**
+* Implements hook_help.
+*
+* Displays help and module information.
+*
+* @param path
+*   Which path of the site we're using to display help
+* @param arg
+*   Array that holds the current path as returned from arg() function
+*/
+function uberdust_charts_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#uberdust_charts":
+      return '<p>'.  t("Enable this so you can view charts from uberdust") .'</p>';
+      break;
+  }
+} 
+
+
+/**
+ * Implements hook_init().
+ */
+function uberdust_charts_init() {
+  // Load javascript on the page in init to help fool caching.
+  //drupal_add_js(drupal_get_path('module', 'uberdust_charts') . '/js/jquery-1.7.1.min.js');
+  drupal_add_js(drupal_get_path('module', 'uberdust_charts') . '/js/highcharts.js');
+  drupal_add_js(drupal_get_path('module', 'uberdust_charts') . '/js/highcharts.src.js');
+  drupal_add_js(drupal_get_path('module', 'uberdust_charts') . '/js/themes/gray.js');
+
+}
+
+/**
+* Implements hook_block_info().
+*/
+function uberdust_charts_block_info() {
+  $blocks['uberdust_charts'] = array(
+    'info' => t('uberdust charts'), //The name that will appear in the block list.
+    'cache' => DRUPAL_CACHE_PER_ROLE, //Default
+  );
+  return $blocks;
+}
+
+ 
+ 
+ function uberdust_charts_contents(){
+	
+ 	module_load_include('php', 'uberdust_charts', 'phphighcharts');
+ }
+ 
+
+/**
+ * Form function, called by drupal_get_form()
+ */
+
+function uberdust_charts_form_ajax($form, &$form_state) {
+
+  $form['#prefix'] = "<div id='nodes-div'>";
+  $form['#suffix'] = "</div>"; 
+ // $n = variable_get('uberdust_charts_number');
+  $n = !empty($form_state['values']['uberdust_charts_number']) ? $form_state['values']['uberdust_charts_number'] : variable_get('uberdust_charts_number');
+  
+  $default = !empty($form_state['values']['uberdust_charts_sameroom']) ? $form_state['values']['uberdust_charts_sameroom'] : variable_get('uberdust_charts_sameroom','');
+  $rooms = drupal_map_assoc(array('CTI Room 0.I.1', 'CTI Room 0.I.2', 'CTI Room 0.I.3', 'CTI Room 0.I.4', 'CTI Room 0.I.5', 'CTI Room 0.I.6', 'CTI Room 0.I.7', 'CTI Room 0.I.8', 'CTI Room 0.I.9', 'CTI Room 0.II.1', 'CTI Room 0.II.2', 'CTI Room 0.II.3', 'CTI Room 0.II.4',));
+  
+  $state = drupal_map_assoc(array('barometricpressure', 'batterycharge', 'ch4', 'co', 'co2', 'humidity', 'ir', 'light', 'light1', 'light2', 'light3', 'light4', 'pir','pressure', 'temperature'));
+
+  $form['uberdust_charts_number'] = array(
+  	'#type' => 'textfield',
+	'#title' => t('Number of nodes'),
+	'#default_value' => variable_get('uberdust_charts_number', 0),
+	'#size' => 3,
+	'#maxlength' => 3,
+	'#description' => t('Number of nodes of the chart you want to display.'),
+  );
+  
+  $form['uberdust_charts_apply'] = array(
+    '#type' => 'button',
+    '#title' => t('Apply'),
+    '#default_value' => t('apply'),
+	'#ajax' => array(
+      'callback' => 'uberdust_charts_autonodes_callback',
+      'wrapper' => 'nodes-div',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+  
+  if ($n > 1){
+  	
+  $form['uberdust_charts_sameroom'] = array(
+    '#type' => 'select',
+    '#title' => t('Nodes on same room'),
+	'#options' => array(1 => 'Yes', 2 => 'No'),
+    '#default_value' => variable_get('uberdust_charts_sameroom',''),
+    '#ajax' => array(
+      'callback' => 'uberdust_charts_autonodes_callback',
+      'wrapper' => 'nodes-div',
+	  'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+  }
+  
+ 
+  $form['nodes_fieldset'] = array(
+    '#title' => t("Uberdust Chart"),
+    // The prefix/suffix provide the div that we're replacing, named by
+    // #ajax['wrapper'] above.
+	//'#prefix' => '<div id="nodes-div">',
+    //'#suffix' => '</div>',
+    '#type' => 'fieldset',
+    
+  );
+  
+  if ($default == 1 && $n > 1){
+	$form['nodes_fieldset']['uberdust_charts_room'] = array(
+    '#type' => 'select',
+    '#title' => t('Room'),
+    '#default_value' => variable_get('uberdust_charts_room', ''),
+    '#options' => $rooms,
+    '#description' => t('The room of the selected chart.'),
+  );
+  }
+   
+   for( $i=1;$i<$n+1;$i++ ) {
+   $form['nodes_fieldset']["uberdust_charts_nodeurn_$i"] = array(
+    '#type' => 'textfield',
+    '#title' => t('Node '.($i)),
+    '#default_value' => variable_get('uberdust_charts_nodeurn_'.$i, ''),
+    '#size' => 10,
+    '#maxlength' => 10,
+    '#description' => "The node $i of the chart you want to display.",
+  );
+
+  $form['nodes_fieldset']["uberdust_charts_capability_$i"] = array(
+  	'#type' => 'select',
+	'#title' => t('Capability '.($i)),
+	'#default_value' => variable_get('uberdust_charts_capability_'.$i, ''),
+	'#options' => $state,
+	'#description' => "The capability $i of the chart you want to display.",
+  );
+  }
+  
+  
+ /* $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );*/
+
+
+
+  return system_settings_form($form);
+}
+
+
+
+function uberdust_charts_autonodes_callback($form, $form_state) {
+  return $form;
+}
+
+
+
+/**
+* Implements hook_menu().
+*/
+
+function uberdust_charts_menu() {
+  $items = array(); 
+
+  $items['admin/settings/uberdust_charts'] = array(
+    'title' => 'Uberdust charts',
+    'description' => 'Configuration for Uberdust charts module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('uberdust_charts_form_ajax'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM, //Will appear in Navigation menu.
+  );
+    $items['uberdust_charts'] = array(
+    'title' => 'Selected uberdust chart',
+	'page callback' => '_uberdust_charts_page',
+    'access arguments' => array('access uberdust_charts content'),
+    'type' => MENU_CALLBACK,
+  );
+  
+ /* $items['uberdust_charts'] = array(
+	'title' => 'Selected uberdust chart',
+	'page callback' => '_uberdust_charts_page',
+	'access arguments' => array('access content'),
+	'type' => MENU_CALLBACK,
+	'file' => 'phphighcharts.php',
+	);*/
+
+ 
+  return $items;
+}  
+
+
+/**
+* Implements hook_permission().
+*/
+function uberdust_charts_permission(){
+  return array(
+    'access uberdust_charts content' => array(
+      'title' => t('Access content for the Uberdust charts module'),
+    ) 
+  ); 
+}
+
+/**
+* Custom page callback function, declared in uberdust_charts_menu().
+*/
+function _uberdust_charts_page() {
+    $page_array['uberdust_charts_Title'] = array(
+	  '#markup' => t('Selected Uberdust Chart'),
+    );
+	
+	$page_array['uberdust_charts_view_arguments'] = array(
+		'#markup' => uberdust_charts_contents(),
+		'#prefix' => '<div id="container">',
+	  	'#suffix' => '</div>',
+	  );
+    return $page_array;
+	
+	
+	
+  }
+
+

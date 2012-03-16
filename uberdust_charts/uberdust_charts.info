@@ -1,0 +1,5 @@
+name = Uberdust charts
+description = A module that allows you to view charts from uberdust.
+core = 7.x
+package = zzz
+files[] = uberdust_charts.test

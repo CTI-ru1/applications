@@ -1,0 +1,59 @@
+<?php
+
+/**
+* @file
+* Tests for the Uberdust charts module
+*/
+
+class UberdustChartsTestCase extends DrupalWebTestCase{
+  public static function getInfo(){
+    return array(
+      'name' => 'Uberdust charts module functionality',
+      'description' => 'Tests hooks in the Uberdust charts module',
+      'group' => 'Uberdust charts',
+    );
+  }
+
+  public function setUp(){
+    parent::setUp('uberdust_charts');
+  }
+
+  public function testPermission(){
+    $data = module_invoke('uberdust_charts', 'permission');
+
+    $this->assertTrue(is_array($data), t('Permission hook returns array.'));
+   
+    $this->assertTrue(array_key_exists('access uberdust_charts content', $data), t('Permission is as expected.'));
+  }
+
+  public function testMenu(){
+    $items = module_invoke('uberdust_charts', 'menu');
+   
+    $this->assertEqual(2, count($items), t('Two items in menu.'));
+   
+    $this->assertIdentical($items['admin/settings/uberdust_charts']['title'],$items['uberdust_charts']['title'], t('Titles are identical.'));
+  }
+/*
+  public function testBlockView(){
+    $data = module_invoke('uberdust_charts', 'block_view', 'uberdust_charts');
+       
+    $this->assertEqual(t('Uberdust_charts'), $data['subject'], t('Subject is as expected.'));
+   
+    $this->assertNotNull($data['content'], t('Block contains data.'));
+  }
+*/
+  public function testBlockInfo(){
+    $info = module_invoke('uberdust_charts', 'block_info');
+   
+    $this->assertNotEqual('DRUPAL_CACHE_PER_USER', $info['uberdust_charts']['cache'], t('Cache is not set to DRUPAL_CACHE_PER_USER'));
+   
+    $this->assertFalse(count($info) > 1, t('No more than one block defined.'));
+  }
+
+ /* public function testBlock(){
+    $info = module_invoke('uberdust_charts', 'block_info');
+    $data = module_invoke('uberdust_charts', 'block_view', 'uberdust_charts');
+     
+    $this->assertIdentical($info['uberdust_charts']['info'], $data['subject'], t('Block list name and subject are identical.'));
+  }*/
+}
