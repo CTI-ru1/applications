@@ -1,12 +1,14 @@
 package eu.uberdust.lights;
 
+import eu.uberdust.communication.protobuf.Message;
 import eu.uberdust.communication.rest.RestClient;
-import eu.uberdust.communication.websocket.WSocketClient;
+import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import eu.uberdust.lights.tasks.LightTask;
-import eu.uberdust.uberlogger.UberLogger;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 
 /**
@@ -16,7 +18,7 @@ import java.util.Timer;
  * Time: 2:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public final class LightController {
+public final class LightController implements Observer {
 
     /**
      * Static Logger.
@@ -71,7 +73,9 @@ public final class LightController {
         zone1 = false;
         zone2 = false;
         timer = new Timer();
-        WSocketClient.getInstance();
+        WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
+        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
+        WSReadingsClient.getInstance().addObserver(this);
     }
 
     public long getLastReading() {
@@ -107,10 +111,10 @@ public final class LightController {
         for (int i = 0; i < reading.length(); i++) {
             linkBuilder.append(",").append(reading.charAt(i));
         }
-        UberLogger.getInstance().log(reading, "T7a");
+
         LOGGER.info(linkBuilder.toString());
         RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
-        UberLogger.getInstance().log(reading, "T7b");
+
     }
 
     public boolean isZone1() {
@@ -123,6 +127,20 @@ public final class LightController {
 
     public static void main(final String[] args) {
         LightController.getInstance();
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (!(o instanceof WSReadingsClient)) {
+            return;
+        }
+        if (!(arg instanceof Message.NodeReadings)) {
+            return;
+        }
+        Message.NodeReadings readings = (Message.NodeReadings) arg;
+        for (Message.NodeReadings.Reading reading : readings.getReadingList()) {
+            LightController.getInstance().setLastReading(reading.getTimestamp());
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 package eu.uberdust.applications.listenerws;
 
-import eu.uberdust.communication.websocket.listener.WSocketClient;
+import eu.uberdust.communication.protobuf.Message;
+import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -38,30 +39,29 @@ public class ListenerApp implements Observer {
     public ListenerApp() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("hello world!");
-        server = "uberdust.cti.gr:80";
-        protocol = "urn:wisebed:ctitestbed:0x9979@urn:wisebed:node:capability:pir";
-        server = "qopbot.dyndns.org:8081";
-        protocol = "urn:qopbot:destiny@urn:qopbot:node:capability:sdb:temperature";
+        server = "ws://carrot.cti.gr:8080/uberdust/readings.ws";
+        // Call http://carrot.cti.gr:8080/uberdust/rest/testbed/1/node/urn:wisebed:ctitestbed:0x9979/capability/urn:wisebed:node:capability:pir/insert/timestamp/1731231000/reading/1/
+        // to add a reading
 
-        WSocketClient.getInstance().setServer(server);
-        WSocketClient.getInstance().setProtocol(protocol);
+        WSReadingsClient.getInstance().setServerUrl(server);
+        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x9979", "urn:wisebed:node:capability:pir");
+
         LOGGER.info("Starting connection with Server:" + server);
         LOGGER.info("Starting connection with protocol:" + protocol);
 
-        WSocketClient.getInstance().start();
-        WSocketClient.getInstance().addObserver(this);
+
+        WSReadingsClient.getInstance().addObserver(this);
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        if (!(o instanceof WSocketClient)) {
+        if (!(o instanceof WSReadingsClient)) {
             return;
         }
-        if (!(arg instanceof String)) {
-            return;
+        LOGGER.info("observed reading");
+        if (arg instanceof Message.NodeReadings) {
+            Message.NodeReadings reading = (Message.NodeReadings) arg;
+            LOGGER.info(reading.getReading(0).getNode());
         }
-
-        final String reading = (String) arg;
-        LOGGER.info(reading);
     }
 }

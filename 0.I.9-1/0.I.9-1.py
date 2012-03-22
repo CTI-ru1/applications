@@ -13,8 +13,9 @@ from autobahn.websocket import connectWS,WebSocketClientFactory, WebSocketClient
 import os
 import time
 import thread
+import message
 	
-WS_URL = 'ws://uberdust.cti.gr:80/lastreading.ws'
+WS_URL = 'ws://uberdust.cti.gr:80/readings.ws'
 PROTOCOL = []
 lasttime = 0
 wsconnection=0
@@ -29,25 +30,27 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 		global wsconnection
 		wsconnection=self
 		# on connection establish
-		print 'WebSocket Connection to ',WS_URL,' established.'
-		print lasttime		
-	def onMessage(self, message, binary):
+		print 'WebSocket Connection to ',WS_URL,' established.'		
+	def onMessage(self, wsmessage, binary):
 		global lasttime
-		global binary1
-		binary1=binary
-		# on received message
-		nowtime=time.time()
-		diff=nowtime-lasttime
-		if diff > 20 :
-			os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/1,1,1 -O /dev/null")
-			#os.system("notify-send --expire-time=1 turning on")
-			#print "turning on after",diff
-			lasttime=nowtime
-			self.sendMessage(message, binary)
-			
-
+		global binary1		
+		envelope = message.Envelope()
+		envelope.ParseFromString(wsmessage)
+		if envelope.type==1:
+			print envelope.nodeReadings.reading[0].timestamp
+			#print readings[0].node
+			binary1=binary
+			# on received message
+			nowtime=envelope.nodeReadings.reading[0].timestamp
+			diff=nowtime-lasttime
+			if diff > 20 :
+				os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/1,1,1 -O /dev/null")
+				#os.system("notify-send --expire-time=1 turning on")
+				#print "turning on after",diff
+				lasttime=nowtime
+				self.sendMessage(wsmessage, binary)
 		#if diff > 30 :
-		print 'Message received [',message,'] '		
+		#print 'Message received [',wsmessage,'] '		
 		#lasttime=millis
 	def onClose(self,wasClean, code, reason):
 		# on close connection
@@ -101,7 +104,7 @@ def main(argv=None):
 			print "Error: unable to create new thread"
 
 		# initialize WebSocketClientFactory object and make connection
-		PROTOCOL =  [''.join([str(node),'@',str(capability)])]
+		PROTOCOL =  [''.join(['SUB@',str(node),'@',str(capability)])]
 		factory = WebSocketClientFactory(WS_URL,None,PROTOCOL)
 		factory.protocol = NodeCapabilityConsumerProtocol
 		factory.setProtocolOptions(13)
