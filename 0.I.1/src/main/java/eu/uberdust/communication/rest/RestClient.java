@@ -8,11 +8,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Created by IntelliJ IDEA.
- * User: akribopo
- * Date: 10/10/11
- * Time: 11:53 AM
- * To change this template use File | Settings | File Templates.
+ * Simple Client for REST calls.
  */
 public final class RestClient {
 
@@ -78,7 +74,7 @@ public final class RestClient {
             return inputLine.toString();
         } catch (final Exception e) {
             LOGGER.error(e);
-            if(e.getMessage().contains("406")){
+            if (e.getMessage().contains("406")) {
                 return "0\t0";
             }
             try {
@@ -89,17 +85,5 @@ public final class RestClient {
             callRestfulWebService(address);
         }
         return "0\t0";
-    }
-
-    /**
-     * Main.
-     *
-     * @param args Arguments.
-     */
-    public static void main(final String[] args) {
-        /*RestClient.getInstance().callRestfulWebService(
-                "http://gold.cti.gr/uberdust/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/1,ff,1");*/
-
-        RestClient.getInstance().callRestfulWebService("http://uberdust.cti.gr/lastreading.ws");
     }
 }

@@ -2,7 +2,7 @@ package eu.uberdust.lights;
 
 import eu.uberdust.MainApp;
 import eu.uberdust.communication.rest.RestClient;
-import eu.uberdust.communication.websocket.WSocketClient;
+import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import eu.uberdust.lights.tasks.KeepLightsOnTask;
 import eu.uberdust.lights.tasks.TurnOffTask;
 import org.apache.log4j.Logger;
@@ -62,15 +62,26 @@ public final class LightController {
     private LightController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("Light Controller initialized");
-        setLastReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT).split("\t")[1]));
-        setScreenLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK).split("\t")[1]) == 1);
+
+        setLastReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
+        setScreenLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1);
+
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isScreenLocked -- " + isScreenLocked);
         zone1 = false;
         zone2 = false;
         timer = new Timer();
 
-        WSocketClient.getInstance();
+        WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
+
+        //Subscription for notifications.
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK, MainApp.URN_SENSOR_SCREENLOCK);
+
+        //Adding Observer for the last readings
+        WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
+
         timer.schedule(new KeepLightsOnTask(timer), KeepLightsOnTask.DELAY);
     }
 
