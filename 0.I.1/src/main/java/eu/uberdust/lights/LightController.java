@@ -62,6 +62,7 @@ public final class LightController {
     private LightController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("Light Controller initialized");
+        timer = new Timer();
 
         setLastReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
         setScreenLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1);
@@ -70,14 +71,14 @@ public final class LightController {
         LOGGER.info("isScreenLocked -- " + isScreenLocked);
         zone1 = false;
         zone2 = false;
-        timer = new Timer();
+
 
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
         //Subscription for notifications.
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+        //WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK, MainApp.URN_SENSOR_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK, MainApp.CAPABILITY_SCREENLOCK);
 
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
