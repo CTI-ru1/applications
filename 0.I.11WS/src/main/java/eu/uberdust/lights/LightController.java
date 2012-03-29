@@ -106,11 +106,7 @@ public final class LightController implements Observer {
         } else {
             zone2 = value;
         }
-        final String reading = String.valueOf(lastReading);
         final StringBuilder linkBuilder = new StringBuilder(REST_LINK).append(zone).append(",").append(value ? 1 : 0);
-        for (int i = 0; i < reading.length(); i++) {
-            linkBuilder.append(",").append(reading.charAt(i));
-        }
 
         LOGGER.info(linkBuilder.toString());
         RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
