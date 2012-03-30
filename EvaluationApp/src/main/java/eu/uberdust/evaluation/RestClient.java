@@ -34,7 +34,7 @@ public final class RestClient implements Observer {
      */
     private static RestClient ourInstance = null;
     private Timer timer;
-    private static final long DELAY = 10000;
+    private static final long DELAY = 60000;
 
     /**
      * RestClient is loaded on the first execution of RestClient.getInstance()
