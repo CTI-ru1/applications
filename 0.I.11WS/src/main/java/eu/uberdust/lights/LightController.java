@@ -25,8 +25,9 @@ public final class LightController implements Observer {
      */
     private static final Logger LOGGER = Logger.getLogger(LightController.class);
 
+
     private final String REST_LINK =
-            "http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/1,";
+            "http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,1,";
 
     private boolean zone1;
 
@@ -74,6 +75,7 @@ public final class LightController implements Observer {
         zone2 = false;
         timer = new Timer();
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
+       // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x494", "urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().addObserver(this);
     }
@@ -106,11 +108,7 @@ public final class LightController implements Observer {
         } else {
             zone2 = value;
         }
-        final String reading = String.valueOf(lastReading);
         final StringBuilder linkBuilder = new StringBuilder(REST_LINK).append(zone).append(",").append(value ? 1 : 0);
-        for (int i = 0; i < reading.length(); i++) {
-            linkBuilder.append(",").append(reading.charAt(i));
-        }
 
         LOGGER.info(linkBuilder.toString());
         RestClient.getInstance().callRestfulWebService(linkBuilder.toString());

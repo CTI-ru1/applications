@@ -2,8 +2,6 @@ package eu.uberdust;
 
 import eu.uberdust.lights.LightController;
 
-import java.util.Date;
-
 /**
  * Entry point.
  */
@@ -17,7 +15,7 @@ public class MainApp {
 
     public static final String CAPABILITY_PIR = "urn:wisebed:node:capability:pir";
 
-    public static final String CAPABILITY_LIGHT = "urn:wisebed:node:capability:pir";
+    public static final String CAPABILITY_LIGHT = "urn:wisebed:node:capability:light";
 
     public static final String CAPABILITY_SCREENLOCK = "urn:ctinetwork:node:capability:lockScreen";
 

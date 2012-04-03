@@ -1,6 +1,6 @@
 package eu.uberdust;
 
-import eu.uberdust.communication.RestClient;
+import eu.uberdust.evaluation.RestClient;
 import org.apache.log4j.Logger;
 
 /**
@@ -8,15 +8,7 @@ import org.apache.log4j.Logger;
  */
 public class MainApp {
 
-    /**
-     * Evaluation String.
-     */
-    private static final String EVALUATION_NODE = "urn:wisebed:ctitestbed:0xa4a";
 
-    /**
-     * Evaluation payload.
-     */
-    private static final String EVALUATION_PAYLOAD = "99,1";
 
     /**
      * Static Logger.
@@ -25,12 +17,10 @@ public class MainApp {
 
     /**
      * Main routine of application.
+     *
      * @param args input arguments
      */
     public static void main(final String[] args) {
-                LOGGER.info("Evaluation Application.");
-                RestClient.getInstance().callRestfulWebService(
-                "http://uberdust.cti.gr/rest/sendCommand/destination/" + EVALUATION_NODE + "/payload/"
-                        + EVALUATION_PAYLOAD);
+        RestClient.getInstance();
     }
 }
