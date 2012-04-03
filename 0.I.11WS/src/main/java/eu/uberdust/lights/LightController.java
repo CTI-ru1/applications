@@ -75,7 +75,7 @@ public final class LightController implements Observer {
         zone2 = false;
         timer = new Timer();
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x494", "urn:wisebed:node:capability:pir");
+       // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x494", "urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().addObserver(this);
     }
