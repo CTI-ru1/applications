@@ -68,7 +68,8 @@ public class LastReadingsObserver implements Observer {
 
                 if(value == 1){
                     LOGGER.info("New Reading for Pir Capability");
-                    LOGGER.info("Pir value: " + value);
+                    LOGGER.info("Pir value: " + value + "  Luminosity: " + LightController.getInstance().getLastLumReading());
+
                     final long timeStmp = reading.getTimestamp();
                     LightController.getInstance().setLastPirReading(timeStmp);  //timeStmp
 

@@ -148,6 +148,10 @@ public final class LightController {
         return this.lastPirReading;
     }
 
+    public double getLastLumReading() {
+        return this.lastLumReading;
+    }
+
     public long getZone2TurnedOnTimestamp() {
         return this.zone2TurnedOnTimestamp;
     }
@@ -186,8 +190,17 @@ public final class LightController {
             }
 
         } else if(!isScreenLocked){
-            //controlLight(true,3);
+
+            if (lastLumReading < LUM_THRESHOLD_1) {
+
             turnOnLight_1();
+
+            } else {
+                //turn off lights
+                controlLight(false,1);
+                controlLight(false,2);
+                controlLight(false,3);
+            }
 
         }
         
