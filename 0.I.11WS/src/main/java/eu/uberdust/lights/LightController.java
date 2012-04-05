@@ -114,6 +114,7 @@ public final class LightController implements Observer {
 
         LOGGER.info(linkBuilder.toString());
         RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
+        RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
 
     }
 
