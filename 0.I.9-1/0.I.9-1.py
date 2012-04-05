@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-"""node-capability-ws-consumer.py
+"""0.I.9-1.py
 
 Message-based WebSockets client that consumes node/capability updates from 
 Uberdust server on http://uberdust.cti.gr.
@@ -14,8 +14,13 @@ import os
 import time
 import thread
 import message
+import urllib2
 	
-WS_URL = 'ws://uberdust.cti.gr:80/readings.ws'
+node="urn:wisebed:ctitestbed:0x9979"
+capability="urn:wisebed:node:capability:pir"
+URL = '://uberdust.cti.gr:80/readings.ws'
+WS_URL = 'ws'+URL
+http_URL = 'http'+URL
 PROTOCOL = []
 lasttime = 0
 wsconnection=0
@@ -27,6 +32,7 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 	"""
 
 	def onOpen(self):
+                os.system("gntp-send '0.I.9-1' 'onOpen'")
 		global wsconnection
 		wsconnection=self
 		# on connection establish
@@ -45,18 +51,12 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 			diff=nowtime-lasttime
 			if diff > 20 :
 				os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/1,1,1 -O /dev/null")
-				#os.system("notify-send --expire-time=1 turning on")
-				#print "turning on after",diff
+				os.system("gntp-send '0.I.9-1' 'turning on'")
 				lasttime=nowtime
 				self.sendMessage(wsmessage, binary)
-		#if diff > 30 :
-		#print 'Message received [',wsmessage,'] '		
-		#lasttime=millis
 	def onClose(self,wasClean, code, reason):
-		# on close connection
-		if(reactor.running):
-			print 'Closing connection to ',WS_URL,' ',code,' ',reason
-			reactor.stop()
+                os.system("gntp-send '0.I.9-1' 'onClose'")
+		reconnect()
 
 def periodic_check( threadName, delay):
 	global lasttime
@@ -69,7 +69,7 @@ def periodic_check( threadName, delay):
 		wsconnection.sendMessage("ping",binary1)
 		if diff >  90:
                         os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/1,1,0 -O /dev/null")
-                        #os.system("notify-send --expire-time=1 turning off")
+			os.system("gntp-send '0.I.9-1' 'turning on'")
                         print "turning off after",diff
 
 
@@ -82,8 +82,6 @@ def main(argv=None):
 	try:
 
 		# parse options and args
-		node="urn:wisebed:ctitestbed:0x9979"
-		capability="urn:wisebed:node:capability:pir"
 		opts, args = getopt.getopt(argv[1:], "", ["help","node=","capability="])
 		print "Node/Capability WebSocket consumer."
 		for k,v in opts:
@@ -104,16 +102,36 @@ def main(argv=None):
 			print "Error: unable to create new thread"
 
 		# initialize WebSocketClientFactory object and make connection
-		PROTOCOL =  [''.join(['SUB@',str(node),'@',str(capability)])]
-		factory = WebSocketClientFactory(WS_URL,None,PROTOCOL)
-		factory.protocol = NodeCapabilityConsumerProtocol
-		factory.setProtocolOptions(13)
-		connectWS(factory)
-		reactor.run()		
+		reconnect()
 	except getopt.error, msg:
 		print >>sys.stderr, msg
 		print >>sys.stderr, "for help use -h or --help"
 		return -1
+
+def reconnect():
+	while 1:
+		try:
+			urllib2.urlopen(http_URL)
+		except urllib2.HTTPError, e:
+			if e.code==406:
+				break
+		except urllib2.URLError, e:
+			os.system("gntp-send '0.I.9-1' 'server unavailable'")
+		else:
+			break
+		time.sleep(10)
+
+	os.system("gntp-send '0.I.9-1' 'connecting'")
+	# initialize WebSocketClientFactory object and make connection
+	PROTOCOL =  [''.join(['SUB@',str(node),'@',str(capability)])]
+	factory = WebSocketClientFactory(WS_URL,None,PROTOCOL)
+	factory.protocol = NodeCapabilityConsumerProtocol
+	factory.setProtocolOptions(13)
+	connectWS(factory)
+	if (reactor.running):
+		print "running"
+	else:
+		reactor.run()	
 
 if __name__ == '__main__':
 	sys.exit(main())
