@@ -94,10 +94,12 @@ public final class LightController implements Observer {
             controlLight(true, 1);
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
                 controlLight(true, 2);
+                controlLight(true, 3);
                 zone2TurnedOnTimestamp = thatReading;
             }
         } else {
             controlLight(true, 2);
+            controlLight(true, 3);
         }
     }
 

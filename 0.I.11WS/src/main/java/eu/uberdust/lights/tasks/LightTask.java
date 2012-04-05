@@ -37,6 +37,7 @@ public class LightTask extends TimerTask {
                 //turn off zone 2
                 LOGGER.debug("Turn off zone 2");
                 LightController.getInstance().controlLight(false, 2);
+                LightController.getInstance().controlLight(false, 3);
 
                 //Re-schedule this timer to run in 30000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY);
