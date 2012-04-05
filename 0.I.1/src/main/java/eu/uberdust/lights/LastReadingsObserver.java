@@ -60,13 +60,19 @@ public class LastReadingsObserver implements Observer {
                 final Double value = reading.getDoubleReading();
                 LOGGER.info("Lum: " + value);
 
-                LightController.getInstance().setLastReading(value);
+                LightController.getInstance().setLastLumReading(value);
 
             } else if (reading.getCapability().equals(MainApp.CAPABILITY_PIR)) {
-                LOGGER.info("New Reading for Pir Capability");
 
                 final Double value = reading.getDoubleReading();
-                LOGGER.info("Pir value: " + value);
+
+                if(value == 1){
+                    LOGGER.info("New Reading for Pir Capability");
+                    LOGGER.info("Pir value: " + value);
+                    final long timeStmp = reading.getTimestamp();
+                    LightController.getInstance().setLastPirReading(timeStmp);  //timeStmp
+
+                }
 
             }
         }

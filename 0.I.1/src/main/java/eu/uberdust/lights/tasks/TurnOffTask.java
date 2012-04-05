@@ -3,6 +3,7 @@ package eu.uberdust.lights.tasks;
 import eu.uberdust.lights.LightController;
 import org.apache.log4j.Logger;
 
+import java.util.Timer;
 import java.util.TimerTask;
 
 /**
@@ -15,20 +16,29 @@ public class TurnOffTask extends TimerTask {
      */
     private static final Logger LOGGER = Logger.getLogger(TurnOffTask.class);
 
-    public static final long DELAY = 30000;
 
-    public TurnOffTask() {
+    private final Timer timer;
+
+    public static final long DELAY = 60000;
+
+    public TurnOffTask(final Timer thatTimer) {
         super();
+        this.timer = thatTimer;
     }
 
     @Override
     public final void run() {
-        LOGGER.debug("Task to turn off Lights initialized");
-        if (LightController.getInstance().isScreenLocked()) {
+        LOGGER.info("Task to turn off Light_1 initialized");
+   //     if (!LightController.getInstance().isScreenLocked()) {
+        if (System.currentTimeMillis() - LightController.getInstance().getLastPirReading() > DELAY) {
+                LOGGER.info("Turn off zone 1");
+            LightController.getInstance().setFlag(false);
             LightController.getInstance().controlLight(false, 1);
-            LightController.getInstance().controlLight(false, 2);
-            LightController.getInstance().controlLight(false, 3);
+        }else {
+            //Re-schedule this timer to run in 5000ms to turn off
+            this.timer.schedule(new TurnOffTask(timer), DELAY / 6);
         }
+
     }
 }
 
