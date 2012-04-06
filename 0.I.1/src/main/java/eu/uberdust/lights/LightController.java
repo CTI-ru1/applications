@@ -3,9 +3,7 @@ package eu.uberdust.lights;
 import eu.uberdust.MainApp;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
-import eu.uberdust.lights.tasks.TurnOffTask;
-import eu.uberdust.lights.tasks.LightTask;
-import eu.uberdust.lights.tasks.TurnOffTask_2;
+import eu.uberdust.lights.tasks.*;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -44,9 +42,9 @@ public final class LightController {
      */
     private static LightController ourInstance = null;
 
-    private static final double LUM_THRESHOLD_1 = 350;                       //350
+    private static final double LUM_THRESHOLD_1 = 6000;                       //350
 
-    private static final double LUM_THRESHOLD_2 = 200;                         //200
+    private static final double LUM_THRESHOLD_2 = 6000;                         //200
 
     private double lastLumReading;
 
@@ -56,7 +54,7 @@ public final class LightController {
 
     private long zone2TurnedOnTimestamp = 0;
 
-    private long firstCall;
+    private long firstCall = 0;
 
     /**
      * LightController is loaded on the first execution of LightController.getInstance()
@@ -81,7 +79,7 @@ public final class LightController {
         LOGGER.info("Light Controller initialized");
         timer = new Timer();
 
-        setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
+        //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
         setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
         setScreenLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1);
 
@@ -132,6 +130,7 @@ public final class LightController {
     }
 
     public void setLastPirReading(final long thatReading) {
+
         this.lastPirReading = thatReading;
         updateLightsState();
 
@@ -208,18 +207,22 @@ public final class LightController {
 
     public synchronized void turnOnLight_1(){
 
+        LOGGER.info("turnOnLight_1()");
+
       if(!flag){
           firstCall = lastPirReading;
           flag = true;
+          timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
       } else if (!zone1) {
+          LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
                 if (lastPirReading - firstCall > 15000) {
                  controlLight(true, 1);
-                    timer.schedule(new TurnOffTask(timer), TurnOffTask.DELAY);
+                 timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
                 }
             }
 
-
     }
+
 
 
 
@@ -252,6 +255,10 @@ public final class LightController {
 
     public boolean isZone2() {
         return zone2;
+    }
+
+    public boolean isFlag() {
+        return this.flag;
     }
 
     public synchronized void controlLight(final boolean value, final int zone){

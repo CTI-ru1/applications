@@ -26,18 +26,17 @@ public class LightTask extends TimerTask {
 
     public LightTask(final Timer thatTimer) {
         super();
-        //TurnOffTask.timer.cancel();
         this.timer = thatTimer;
     }
 
     @Override
     public final void run() {
-        LOGGER.debug("Task to turn off Lights initialized");
+        LOGGER.info("LightTask: Task to turn off Lights initialized");
         if (LightController.getInstance().isZone2()) {
             if (System.currentTimeMillis() - LightController.getInstance().getLastPirReading() > DELAY) {
                 //turn off zone 2
              if (LightController.getInstance().isScreenLocked()) {
-                LOGGER.debug("Turn off zone 2");
+                LOGGER.info("LightTask: Turn off zone 2");
                 LightController.getInstance().controlLight(false, 2);
              }
                 //Re-schedule this timer to run in 30000ms to turn off
@@ -50,7 +49,7 @@ public class LightTask extends TimerTask {
             if (System.currentTimeMillis() - LightController.getInstance().getLastPirReading() > 30000) {
                 //turn off zone 1
                 LightController.getInstance().controlLight(false, 1);
-                LOGGER.debug("Turn off zone 1");
+                LOGGER.info("LightTask: Turn off zone 1");
             } else {
                 //Re-schedule this timer to run in 5000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY / 6);

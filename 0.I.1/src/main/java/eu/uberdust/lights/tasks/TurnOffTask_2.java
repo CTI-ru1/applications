@@ -22,7 +22,7 @@ public class TurnOffTask_2 extends TimerTask {
     /**
      * Static Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(TurnOffTask.class);
+    private static final Logger LOGGER = Logger.getLogger(TurnOffTask_2.class);
 
 
     private final Timer timer;
@@ -36,11 +36,11 @@ public class TurnOffTask_2 extends TimerTask {
 
     @Override
     public final void run() {
-        LOGGER.info("Task to turn off Light_2 initialized");
+        LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
             if (LightController.getInstance().isScreenLocked()) {
 
             if (System.currentTimeMillis() - LightController.getInstance().getZone2TurnedOnTimestamp() > DELAY) {
-                LOGGER.info("Turn off zone 2");
+                LOGGER.info("TurnOffTask_2: Turn off zone 2");
                 LightController.getInstance().controlLight(false, 2);
                 }
 
