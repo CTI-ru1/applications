@@ -42,9 +42,9 @@ public final class LightController {
      */
     private static LightController ourInstance = null;
 
-    private static final double LUM_THRESHOLD_1 = 6000;                       //350
+    private static final double LUM_THRESHOLD_1 = 350;                       //350
 
-    private static final double LUM_THRESHOLD_2 = 6000;                         //200
+    private static final double LUM_THRESHOLD_2 = 200;                         //200
 
     private double lastLumReading;
 
