@@ -66,7 +66,7 @@ public class LastReadingsObserver implements Observer {
 
                 final Double value = reading.getDoubleReading();
 
-                if(value == 1){
+                if (value == 1) {
                     LOGGER.info("New Reading for Pir Capability");
                     LOGGER.info("Pir value: " + value + "  Luminosity: " + LightController.getInstance().getLastLumReading());
 

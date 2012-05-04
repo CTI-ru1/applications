@@ -37,14 +37,14 @@ public class TurnOffTask_2 extends TimerTask {
     @Override
     public final void run() {
         LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
-            if (LightController.getInstance().isScreenLocked()) {
+        if (LightController.getInstance().isScreenLocked()) {
 
             if (System.currentTimeMillis() - LightController.getInstance().getZone2TurnedOnTimestamp() > DELAY) {
                 LOGGER.info("TurnOffTask_2: Turn off zone 2");
                 LightController.getInstance().controlLight(false, 2);
-                }
-
             }
+
+        }
 
     }
 }

@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class KeepLightsOn extends TimerTask{
+public class KeepLightsOn extends TimerTask {
 
     private static final Logger LOGGER = Logger.getLogger(KeepLightsOn.class);
 
@@ -22,31 +22,29 @@ public class KeepLightsOn extends TimerTask{
     private final Timer timer;
 
     public static final long DELAY = 60000;
-    
-    public KeepLightsOn(final Timer thatTimer){
+
+    public KeepLightsOn(final Timer thatTimer) {
         super();
         this.timer = thatTimer;
-        
+
     }
 
     @Override
     public void run() {
         LOGGER.info("KeepLightsOn: initiated");
 
-      if(!LightController.getInstance().isScreenLocked()){
-        if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1 && LightController.getInstance().getLastLumReading()  > LightController.LUM_THRESHOLD_2) {
-            LightController.getInstance().controlLight(true,3);
+        if (!LightController.getInstance().isScreenLocked()) {
+            if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1 && LightController.getInstance().getLastLumReading() > LightController.LUM_THRESHOLD_2) {
+                LightController.getInstance().controlLight(true, 3);
 
-        }   else if(LightController.getInstance().getLastLumReading()  < LightController.LUM_THRESHOLD_2){
-            LightController.getInstance().controlLight(true,2);
-            LightController.getInstance().controlLight(true,3);
-        } else if(LightController.getInstance().getLastLumReading()  > LightController.LUM_THRESHOLD_1){
-            LightController.getInstance().controlLight(false,1);
-            LightController.getInstance().controlLight(false,2);
-            LightController.getInstance().controlLight(false,3);
+            } else if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_2) {
+                LightController.getInstance().controlLight(true, 2);
+                LightController.getInstance().controlLight(true, 3);
+            } else if (LightController.getInstance().getLastLumReading() > LightController.LUM_THRESHOLD_1) {
+                LightController.getInstance().controlLight(false, -1);
+            }
+
         }
-
-       }
         this.timer.schedule(new KeepLightsOn(timer), DELAY);
-   }
+    }
 }

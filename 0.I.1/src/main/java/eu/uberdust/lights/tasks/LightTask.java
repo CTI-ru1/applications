@@ -35,10 +35,10 @@ public class LightTask extends TimerTask {
         if (LightController.getInstance().isZone2()) {
             if (System.currentTimeMillis() - LightController.getInstance().getLastPirReading() > DELAY) {
                 //turn off zone 2
-             if (LightController.getInstance().isScreenLocked()) {
-                LOGGER.info("LightTask: Turn off zone 2");
-                LightController.getInstance().controlLight(false, 2);
-             }
+                if (LightController.getInstance().isScreenLocked()) {
+                    LOGGER.info("LightTask: Turn off zone 2");
+                    LightController.getInstance().controlLight(false, 2);
+                }
                 //Re-schedule this timer to run in 30000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY);
             } else {

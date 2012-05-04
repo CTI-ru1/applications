@@ -52,6 +52,7 @@ public final class RestClient {
      */
     public String callRestfulWebService(final String address) {
         try {
+           // System.err.println(address);
             final URL url = new URL(address);
             final URLConnection yc;
 
