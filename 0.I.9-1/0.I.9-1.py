@@ -56,9 +56,10 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 				logging.debug(str(envelope.nodeReadings.reading[0].timestamp)+str(envelope.nodeReadings.reading[0].node))
 				binary1=binary
 				# on received message
-				nowtime=envelope.nodeReadings.reading[0].timestamp
+				nowtime=envelope.nodeReadings.reading[0].timestamp/1000
 				diff=nowtime-lasttime
 				if diff > 20 :
+					logging.info("turning on")
 					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,1")
 					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1")
 					#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/1/")
@@ -81,16 +82,18 @@ def periodic_check( threadName, delay):
                 # on received message
                 nowtime=time.time()
                 diff=nowtime-lasttime
-		loggin.info("sending ping")
+		logging.info("sending ping")
 		wsconnection.sendMessage("ping",binary1)
 		logging.info("diff is "+str(diff))
-		if diff >  90:
-			urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light3/insert/timestamp/"+str(nowtime)+"/reading/0/")
-			urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/0/")
+		if diff >  delay:
+			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0")
+			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0")
+			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light3/insert/timestamp/"+str(nowtime)+"/reading/0/")
+			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/0/")
                         #os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0 -O /dev/null")
 			#os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0 -O /dev/null")
 			#os.system("gntp-send '0.I.9-1' 'turning off'")
-                        loggging.info("turning off after "+str(diff))
+                        logging.info("turning off after "+str(diff))
 def ping_task( threadName, delay):	
 	global wsconnection
 	while 1:
@@ -120,7 +123,7 @@ def main(argv=None):
 
 
 		try:
-			thread.start_new_thread(periodic_check, ("Thread-1", 90, ))
+			thread.start_new_thread(periodic_check, ("Thread-1", 60, ))
 			thread.start_new_thread(ping_task, ("Thread-1", 30, ))
 		except:
 			logging.error("Error: unable to create new thread")
