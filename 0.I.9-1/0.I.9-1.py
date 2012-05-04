@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 """0.I.9-1.py
-
 Message-based WebSockets client that consumes node/capability updates from 
 Uberdust server on http://uberdust.cti.gr.
 """
@@ -15,7 +14,14 @@ import time
 import thread
 import message
 import urllib2
-	
+import logging
+
+logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename='0.I.9-1.log',level=logging.DEBUG)
+
+#FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
+#logging.basicConfig(format=FORMAT)
+#logger = logging.getLogger('0.I.9-1.py')
+
 node="urn:wisebed:ctitestbed:0x9979"
 capability="urn:wisebed:node:capability:pir"
 URL = '://uberdust.cti.gr:80/readings.ws'
@@ -26,36 +32,46 @@ lasttime = 0
 wsconnection=0
 binary1=0
 
+
+logging.info('Starting application')
+
 class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 	"""
 	Node/Capability consumer protocol class.
 	"""
 
 	def onOpen(self):
-                os.system("gntp-send '0.I.9-1' 'onOpen'")
+                #os.system("gntp-send '0.I.9-1' 'onOpen'")
 		global wsconnection
 		wsconnection=self
 		# on connection establish
-		print 'WebSocket Connection to ',WS_URL,' established.'		
+		logging.info('WebSocket Connection to '+str(WS_URL)+' established.')
 	def onMessage(self, wsmessage, binary):
 		global lasttime
 		global binary1		
-		envelope = message.Envelope()
-		envelope.ParseFromString(wsmessage)
-		if envelope.type==1:
-			print envelope.nodeReadings.reading[0].timestamp
-			#print readings[0].node
-			binary1=binary
-			# on received message
-			nowtime=envelope.nodeReadings.reading[0].timestamp
-			diff=nowtime-lasttime
-			if diff > 20 :
-				os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/1,1,1 -O /dev/null")
-				os.system("gntp-send '0.I.9-1' 'turning on'")
-				lasttime=nowtime
-				self.sendMessage(wsmessage, binary)
+		try :
+			envelope = message.Envelope()
+			envelope.ParseFromString(wsmessage)
+			if envelope.type==1:
+				logging.debug(str(envelope.nodeReadings.reading[0].timestamp)+str(envelope.nodeReadings.reading[0].node))
+				binary1=binary
+				# on received message
+				nowtime=envelope.nodeReadings.reading[0].timestamp/1000
+				diff=nowtime-lasttime
+				if diff > 20 :
+					logging.info("turning on")
+					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,1")
+					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1")
+					#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/1/")
+					#os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1 -O /dev/null")
+					#os.system("gntp-send '0.I.9-1' 'turning on'")
+					lasttime=nowtime
+					self.sendMessage(wsmessage, binary)
+		except :
+			logging.error("error in onMessage")
 	def onClose(self,wasClean, code, reason):
-                os.system("gntp-send '0.I.9-1' 'onClose'")
+		logging.info("onClose")
+                #os.system("gntp-send '0.I.9-1' 'onClose'")
 		reconnect()
 
 def periodic_check( threadName, delay):
@@ -66,16 +82,26 @@ def periodic_check( threadName, delay):
                 # on received message
                 nowtime=time.time()
                 diff=nowtime-lasttime
+		logging.info("sending ping")
 		wsconnection.sendMessage("ping",binary1)
-		if diff >  90:
-                        os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/1,1,0 -O /dev/null")
-			os.system("gntp-send '0.I.9-1' 'turning on'")
-                        print "turning off after",diff
-
-
-		
-
+		logging.info("diff is "+str(diff))
+		if diff >  delay:
+			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0")
+			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0")
+			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light3/insert/timestamp/"+str(nowtime)+"/reading/0/")
+			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/0/")
+                        #os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0 -O /dev/null")
+			#os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0 -O /dev/null")
+			#os.system("gntp-send '0.I.9-1' 'turning off'")
+                        logging.info("turning off after "+str(diff))
+def ping_task( threadName, delay):	
+	global wsconnection
+	while 1:
+		time.sleep(delay)
+		wsconnection.sendMessage("ping",binary1)	
 def main(argv=None):
+	global lasttime
+	lasttime=time.time()
 	"""Main routine of script"""
 	if argv is None:
 		argv = sys.argv
@@ -83,7 +109,7 @@ def main(argv=None):
 
 		# parse options and args
 		opts, args = getopt.getopt(argv[1:], "", ["help","node=","capability="])
-		print "Node/Capability WebSocket consumer."
+		logging.debug("Node/Capability WebSocket consumer.")
 		for k,v in opts:
 			if k == "--help":
 				print "A simple python script for consuming readings for a specific Node/Capability pair.\nHit CTRL-C to stop script at any time.\nMust provide all of the parameters listed bellow :"
@@ -97,9 +123,10 @@ def main(argv=None):
 
 
 		try:
-			thread.start_new_thread(periodic_check, ("Thread-1", 90, ))
+			thread.start_new_thread(periodic_check, ("Thread-1", 60, ))
+			thread.start_new_thread(ping_task, ("Thread-1", 30, ))
 		except:
-			print "Error: unable to create new thread"
+			logging.error("Error: unable to create new thread")
 
 		# initialize WebSocketClientFactory object and make connection
 		reconnect()
@@ -116,12 +143,13 @@ def reconnect():
 			if e.code==406:
 				break
 		except urllib2.URLError, e:
-			os.system("gntp-send '0.I.9-1' 'server unavailable'")
+			logging.info("server unavailable")
+			#os.system("gntp-send '0.I.9-1' 'server unavailable'")
 		else:
 			break
 		time.sleep(10)
 
-	os.system("gntp-send '0.I.9-1' 'connecting'")
+	#os.system("gntp-send '0.I.9-1' 'connecting'")
 	# initialize WebSocketClientFactory object and make connection
 	PROTOCOL =  [''.join(['SUB@',str(node),'@',str(capability)])]
 	factory = WebSocketClientFactory(WS_URL,None,PROTOCOL)
@@ -129,7 +157,7 @@ def reconnect():
 	factory.setProtocolOptions(13)
 	connectWS(factory)
 	if (reactor.running):
-		print "running"
+		logging.info("running")
 	else:
 		reactor.run()	
 
