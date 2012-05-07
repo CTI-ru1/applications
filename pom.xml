@@ -11,6 +11,7 @@
         <!--<module>0.I.11</module>-->
         <module>0.I.11WS</module>
         <module>0.I.1</module>
+        <module>0.I.2</module>
         <module>0.I.3</module>
         <module>TraceParser</module>
         <module>EvaluationApp</module>
