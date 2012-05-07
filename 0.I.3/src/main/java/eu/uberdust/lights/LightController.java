@@ -3,7 +3,10 @@ package eu.uberdust.lights;
 import eu.uberdust.MainApp;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
-import eu.uberdust.lights.tasks.*;
+import eu.uberdust.lights.tasks.KeepLightsOn;
+import eu.uberdust.lights.tasks.TurnOffTask_2;
+import eu.uberdust.lights.tasks.TurnOffTask_3;
+import eu.uberdust.lights.tasks.TurnOffTask_4;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -122,16 +125,23 @@ public final class LightController {
     public void setLastLumReading(final double thatReading) {
         this.lastLumReading = thatReading;
 
-        if(lastLumReading < LUM_THRESHOLD_1)
-        {
-            if(!isYellowLocked){controlLight(true,1);}
-            if(!isBlancoLocked){controlLight(true,2);}
-            if(!isAmethystLocked){controlLight(true,3);}
-            if(!isSilverLocked){controlLight(true,4);}
-        } else{
-            controlLight(false,-1);
+        if (lastLumReading < LUM_THRESHOLD_1) {
+            if (!isYellowLocked) {
+                controlLight(true, 1);
+            }
+            if (!isBlancoLocked) {
+                controlLight(true, 2);
+            }
+            if (!isAmethystLocked) {
+                controlLight(true, 3);
+            }
+            if (!isSilverLocked) {
+                controlLight(true, 4);
+            }
+        } else {
+            controlLight(false, -1);
         }
-      }
+    }
 
 
     public void setFlag(final boolean thatFlag) {
@@ -150,30 +160,50 @@ public final class LightController {
     public void setAmethystLocked(final boolean screenLocked) {
         this.isAmethystLocked = screenLocked;
 
-        if(!isAmethystLocked){if(lastLumReading < LUM_THRESHOLD_1){controlLight(true,3);}}
-        else if(isAmethystLocked){timer.schedule(new TurnOffTask_2(timer, 3, "amethyst"), TurnOffTask_2.DELAY);}
+        if (!isAmethystLocked) {
+            if (lastLumReading < LUM_THRESHOLD_1) {
+                controlLight(true, 3);
+            }
+        } else if (isAmethystLocked) {
+            timer.schedule(new TurnOffTask_2(timer, 3, "amethyst"), TurnOffTask_2.DELAY);
+        }
 
     }
 
     public void setSilverLocked(final boolean screenLocked) {
         this.isSilverLocked = screenLocked;
 
-        if(!isSilverLocked){if(lastLumReading < LUM_THRESHOLD_1){controlLight(true,4);}}
-        else if(isSilverLocked){timer.schedule(new TurnOffTask_2(timer, 4, "silver"), TurnOffTask_2.DELAY);}
+        if (!isSilverLocked) {
+            if (lastLumReading < LUM_THRESHOLD_1) {
+                controlLight(true, 4);
+            }
+        } else if (isSilverLocked) {
+            timer.schedule(new TurnOffTask_2(timer, 4, "silver"), TurnOffTask_2.DELAY);
+        }
     }
 
     public void setBlancoLocked(final boolean screenLocked) {
         this.isBlancoLocked = screenLocked;
 
-        if(!isBlancoLocked){if(lastLumReading < LUM_THRESHOLD_1){controlLight(true,2);}}
-        else if(isBlancoLocked){timer.schedule(new TurnOffTask_2(timer, 2, "blanco"), TurnOffTask_2.DELAY);}
+        if (!isBlancoLocked) {
+            if (lastLumReading < LUM_THRESHOLD_1) {
+                controlLight(true, 2);
+            }
+        } else if (isBlancoLocked) {
+            timer.schedule(new TurnOffTask_2(timer, 2, "blanco"), TurnOffTask_2.DELAY);
+        }
     }
 
     public void setYellowLocked(final boolean screenLocked) {
         this.isYellowLocked = screenLocked;
 
-        if(!isYellowLocked){if(lastLumReading < LUM_THRESHOLD_1){controlLight(true,1);}}
-        else if(isYellowLocked){timer.schedule(new TurnOffTask_2(timer, 1, "yellow"), TurnOffTask_2.DELAY);}
+        if (!isYellowLocked) {
+            if (lastLumReading < LUM_THRESHOLD_1) {
+                controlLight(true, 1);
+            }
+        } else if (isYellowLocked) {
+            timer.schedule(new TurnOffTask_2(timer, 1, "yellow"), TurnOffTask_2.DELAY);
+        }
     }
 
     public long getLastPirReading() {
@@ -185,36 +215,35 @@ public final class LightController {
     }
 
 
-
     public synchronized void updateLightsState() {
-       
-            if (lastLumReading < LUM_THRESHOLD_1) {
-                //turn on lights
-                turnOnLight_1();
+
+        if (lastLumReading < LUM_THRESHOLD_1) {
+            //turn on lights
+            turnOnLight_1();
 
 
-            } else {
-                //turn off lights
-                controlLight(false,-1);
-            }
-
+        } else {
+            //turn off lights
+            controlLight(false, -1);
         }
 
-    public synchronized void turnOnLight_1(){
+    }
+
+    public synchronized void turnOnLight_1() {
 
         LOGGER.info("turnOnLight_1()");
 
-      if(!flag){
-          firstCall = lastPirReading;
-          flag = true;
-          timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
-      } else if (!zone1) {
-          LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
-                if (lastPirReading - firstCall > 15000) {
-                 controlLight(true, 5);
-                 timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
-                }
+        if (!flag) {
+            firstCall = lastPirReading;
+            flag = true;
+            timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
+        } else if (!zone1) {
+            LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
+            if (lastPirReading - firstCall > 15000) {
+                controlLight(true, 5);
+                timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
             }
+        }
 
     }
 
@@ -243,36 +272,39 @@ public final class LightController {
         return zone2;
     }
 
-    public synchronized void controlLight(final boolean value, final int zone){
+    public synchronized void controlLight(final boolean value, final int zone) {
         if (zone == 1) {
             zone1 = value;
-        }   else if(zone == 2) {
+        } else if (zone == 2) {
             zone2 = value;
-        }   else {
+        } else {
             zone3 = value;
         }
 
         final String zonef;
 
-        if(zone == -1){zonef = "ff";}
-        else{zonef = ""+zone;}
+        if (zone == -1) {
+            zonef = "ff";
+        } else {
+            zonef = "" + zone;
+        }
 
         final String link = new StringBuilder(MainApp.LIGHT_CONTROLLER).append(zonef).append(",").append(value ? 1 : 0).toString();
         LOGGER.info(link);
-        try{
+        try {
             restCall(link);
-    } catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public synchronized void restCall(final String link) throws InterruptedException{
+    public synchronized void restCall(final String link) throws InterruptedException {
 
-        for(int i=0;i < MAX_TRIES;i++){
+        for (int i = 0; i < MAX_TRIES; i++) {
             RestClient.getInstance().callRestfulWebService(link);
             Thread.sleep(200);
         }
-        
+
     }
 
     public static void main(final String[] args) {

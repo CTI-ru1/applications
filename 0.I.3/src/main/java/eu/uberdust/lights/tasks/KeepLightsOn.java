@@ -33,14 +33,21 @@ public class KeepLightsOn extends TimerTask {
     public void run() {
         LOGGER.info("KeepLightsOn: initiated");
 
-        if(LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1)
-        {
-            if(!LightController.getInstance().isYellowLocked()){LightController.getInstance().controlLight(true,1);}
-            if(!LightController.getInstance().isBlancoLocked()){LightController.getInstance().controlLight(true,2);}
-            if(!LightController.getInstance().isAmethystLocked()){LightController.getInstance().controlLight(true,3);}
-            if(!LightController.getInstance().isSilverLocked()){LightController.getInstance().controlLight(true,4);}
-        } else{
-            LightController.getInstance().controlLight(false,-1);
+        if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1) {
+            if (!LightController.getInstance().isYellowLocked()) {
+                LightController.getInstance().controlLight(true, 1);
+            }
+            if (!LightController.getInstance().isBlancoLocked()) {
+                LightController.getInstance().controlLight(true, 2);
+            }
+            if (!LightController.getInstance().isAmethystLocked()) {
+                LightController.getInstance().controlLight(true, 3);
+            }
+            if (!LightController.getInstance().isSilverLocked()) {
+                LightController.getInstance().controlLight(true, 4);
+            }
+        } else {
+            LightController.getInstance().controlLight(false, -1);
         }
         this.timer.schedule(new KeepLightsOn(timer), DELAY);
     }

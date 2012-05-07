@@ -47,16 +47,21 @@ public class LastReadingsObserver implements Observer {
             if (reading.getCapability().equals(MainApp.CAPABILITY_SCREENLOCK)) {
                 LOGGER.info("New Reading for Screen Lock Capability");
 
-                final String node=""+reading.getNode().split(":")[2];
+                final String node = "" + reading.getNode().split(":")[2];
                 final boolean isScreenLocked = reading.getDoubleReading() == 1;
                 LOGGER.info(new StringBuilder().append("isScreenLocked: ")
                         .append(reading.getDoubleReading()).append(" -- ")
                         .append(isScreenLocked).append(" -- ").append(node).append(" -- ").append(node.equals("amethyst")).toString());
-                
-                if(node.equals("amethyst")){ LightController.getInstance().setAmethystLocked(isScreenLocked);}
-                else if(node.equals("silver")){LightController.getInstance().setSilverLocked(isScreenLocked);}
-                else if(node.equals("blanco")){LightController.getInstance().setBlancoLocked(isScreenLocked);}
-                else if(node.equals("yellow")){LightController.getInstance().setYellowLocked(isScreenLocked);}
+
+                if (node.equals("amethyst")) {
+                    LightController.getInstance().setAmethystLocked(isScreenLocked);
+                } else if (node.equals("silver")) {
+                    LightController.getInstance().setSilverLocked(isScreenLocked);
+                } else if (node.equals("blanco")) {
+                    LightController.getInstance().setBlancoLocked(isScreenLocked);
+                } else if (node.equals("yellow")) {
+                    LightController.getInstance().setYellowLocked(isScreenLocked);
+                }
 
             } else if (reading.getCapability().equals(MainApp.CAPABILITY_LIGHT)) {
                 LOGGER.info("New Reading for Light Capability");
@@ -70,7 +75,7 @@ public class LastReadingsObserver implements Observer {
 
                 final Double value = reading.getDoubleReading();
 
-                if(value == 1){
+                if (value == 1) {
                     LOGGER.info("New Reading for Pir Capability");
                     LOGGER.info("Pir value: " + value + "  Luminosity: " + LightController.getInstance().getLastLumReading());
 

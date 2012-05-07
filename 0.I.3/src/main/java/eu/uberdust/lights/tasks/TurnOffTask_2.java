@@ -47,17 +47,22 @@ public class TurnOffTask_2 extends TimerTask {
     public final void run() {
         LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
 
-            if(node.equals("amethyst")){isScreenLocked = LightController.getInstance().isAmethystLocked();}
-            else if(node.equals("silver")){isScreenLocked = LightController.getInstance().isSilverLocked();}
-            else if(node.equals("blanco")){isScreenLocked = LightController.getInstance().isBlancoLocked();}
-            else if(node.equals("yellow")){isScreenLocked = LightController.getInstance().isYellowLocked();}
+        if (node.equals("amethyst")) {
+            isScreenLocked = LightController.getInstance().isAmethystLocked();
+        } else if (node.equals("silver")) {
+            isScreenLocked = LightController.getInstance().isSilverLocked();
+        } else if (node.equals("blanco")) {
+            isScreenLocked = LightController.getInstance().isBlancoLocked();
+        } else if (node.equals("yellow")) {
+            isScreenLocked = LightController.getInstance().isYellowLocked();
+        }
 
         if (isScreenLocked) {
-                LOGGER.info("TurnOffTask_2: Turn off zone "+zone+" "+node+" "+isScreenLocked);
-                LightController.getInstance().controlLight(false, zone);
-            }
-
+            LOGGER.info("TurnOffTask_2: Turn off zone " + zone + " " + node + " " + isScreenLocked);
+            LightController.getInstance().controlLight(false, zone);
         }
+
+    }
 
 
 }
