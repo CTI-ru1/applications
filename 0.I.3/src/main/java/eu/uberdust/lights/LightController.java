@@ -165,7 +165,8 @@ public final class LightController {
                 controlLight(true, 3);
             }
         } else if (isAmethystLocked) {
-            timer.schedule(new TurnOffTask_2(timer, 3, "amethyst"), TurnOffTask_2.DELAY);
+           // timer.schedule(new TurnOffTask_2(timer, 3, "amethyst"), TurnOffTask_2.DELAY);
+            controlLight(false, 3);
         }
 
     }
@@ -178,7 +179,8 @@ public final class LightController {
                 controlLight(true, 4);
             }
         } else if (isSilverLocked) {
-            timer.schedule(new TurnOffTask_2(timer, 4, "silver"), TurnOffTask_2.DELAY);
+            //timer.schedule(new TurnOffTask_2(timer, 4, "silver"), TurnOffTask_2.DELAY);
+            controlLight(false, 4);
         }
     }
 
@@ -190,7 +192,8 @@ public final class LightController {
                 controlLight(true, 2);
             }
         } else if (isBlancoLocked) {
-            timer.schedule(new TurnOffTask_2(timer, 2, "blanco"), TurnOffTask_2.DELAY);
+            //timer.schedule(new TurnOffTask_2(timer, 2, "blanco"), TurnOffTask_2.DELAY);
+            controlLight(false, 2);
         }
     }
 
@@ -202,7 +205,8 @@ public final class LightController {
                 controlLight(true, 1);
             }
         } else if (isYellowLocked) {
-            timer.schedule(new TurnOffTask_2(timer, 1, "yellow"), TurnOffTask_2.DELAY);
+            //timer.schedule(new TurnOffTask_2(timer, 1, "yellow"), TurnOffTask_2.DELAY);
+            controlLight(false, 1);
         }
     }
 
