@@ -91,7 +91,7 @@ public final class LightController {
         setAmethystLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_SILVER_REST).split("\t")[1]) == 1);
         setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
         setBlancoLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]) == 1);
-        //setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
+        setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isYellowLocked -- " + isYellowLocked);
@@ -107,12 +107,12 @@ public final class LightController {
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
         //Subscription for notifications.
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+       // WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_AMETHYST, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_SILVER, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_BLANCO, MainApp.CAPABILITY_SCREENLOCK);
-        //WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_YELLOW, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_YELLOW, MainApp.CAPABILITY_SCREENLOCK);
 
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
