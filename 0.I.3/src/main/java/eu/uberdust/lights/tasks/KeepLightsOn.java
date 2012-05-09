@@ -32,6 +32,11 @@ public class KeepLightsOn extends TimerTask {
     @Override
     public void run() {
         LOGGER.info("KeepLightsOn: initiated");
+        LOGGER.info("KeepLightsOn: isYellowLocked -- "+LightController.getInstance().isYellowLocked());
+        LOGGER.info("KeepLightsOn: isBlancoLocked -- "+LightController.getInstance().isBlancoLocked());
+        LOGGER.info("KeepLightsOn: isAmethystLocked -- "+LightController.getInstance().isAmethystLocked());
+        LOGGER.info("KeepLightsOn: isSilverLocked -- "+LightController.getInstance().isSilverLocked());
+
 
         if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1) {
             if (!LightController.getInstance().isYellowLocked()) {
