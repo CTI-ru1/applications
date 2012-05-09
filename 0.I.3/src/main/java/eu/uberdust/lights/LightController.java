@@ -51,9 +51,11 @@ public final class LightController {
      */
     private static LightController ourInstance = null;
 
-    public static final double LUM_THRESHOLD_1 = 10000;                       //350
+    public static final double LUM_THRESHOLD_1 = 350;                       //350
 
     private double lastLumReading;
+
+    private double lastStatusReading;
 
     private long lastPirReading;
 
@@ -92,6 +94,7 @@ public final class LightController {
         setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
         setBlancoLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]) == 1);
         setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
+        setLastStatusReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isYellowLocked -- " + isYellowLocked);
@@ -109,16 +112,28 @@ public final class LightController {
         //Subscription for notifications.
        // WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_AMETHYST, MainApp.CAPABILITY_SCREENLOCK);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_SILVER, MainApp.CAPABILITY_SCREENLOCK);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_BLANCO, MainApp.CAPABILITY_SCREENLOCK);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_YELLOW, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_AMETHYST, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SILVER, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_BLANCO, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_YELLOW, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_YELLOW, MainApp.CAPABILITY_STATUS);
 
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
 
         timer.schedule(new KeepLightsOn(timer), KeepLightsOn.DELAY);
 
+    }
+
+
+    public void setLastStatusReading(final double thatReading){
+        this.lastStatusReading = thatReading ;
+
+        if(System.currentTimeMillis() - lastStatusReading > 2100000 )
+        {controlLight(false, 1); 
+         isYellowLocked = true;
+            LOGGER.info("Yellow is turned off");}
+        
     }
 
 
