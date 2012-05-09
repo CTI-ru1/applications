@@ -8,6 +8,8 @@ package eu.uberdust.lights.tasks;
  * To change this template use File | Settings | File Templates.
  */
 
+import eu.uberdust.MainApp;
+import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.lights.LightController;
 import org.apache.log4j.Logger;
 
@@ -36,6 +38,12 @@ public class KeepLightsOn extends TimerTask {
         LOGGER.info("KeepLightsOn: isBlancoLocked -- "+LightController.getInstance().isBlancoLocked());
         LOGGER.info("KeepLightsOn: isAmethystLocked -- "+LightController.getInstance().isAmethystLocked());
         LOGGER.info("KeepLightsOn: isSilverLocked -- "+LightController.getInstance().isSilverLocked());
+
+        LOGGER.info("WISEDB: initiated");
+        LOGGER.info("WISEDB: isYellowLocked -- "+Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]));
+        LOGGER.info("WISEDB: isBlancoLocked -- "+Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]));
+        LOGGER.info("WISEDB: isAmethystLocked -- "+Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]));
+        LOGGER.info("WISEDB: isSilverLocked -- "+Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_SILVER_REST).split("\t")[1]));
 
 
         if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1) {
