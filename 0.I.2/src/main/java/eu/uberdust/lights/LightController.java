@@ -89,7 +89,8 @@ public final class LightController {
         //setBrownLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BROWN_REST).split("\t")[1]) == 1);
         setBrownLocked(true);
         setAmberLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMBER_REST).split("\t")[1]) == 1);
-        setMoinLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_MOIN_REST).split("\t")[1]) == 1);
+        //setMoinLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_MOIN_REST).split("\t")[1]) == 1);
+        setMoinLocked(true);
 
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
