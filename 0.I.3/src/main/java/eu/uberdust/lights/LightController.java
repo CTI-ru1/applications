@@ -143,11 +143,11 @@ public final class LightController {
         this.lastStatusSilverReading = thatReading ;
 
         LOGGER.info("System - lastStatusSilverReading : "+(System.currentTimeMillis() - lastStatusSilverReading));
-        /*
+
         if(System.currentTimeMillis() - lastStatusSilverReading > 2100000 )
-        {controlLight(false, 4);
+        {/*controlLight(false, 4);
             isSilverLocked = true;       */
-            LOGGER.info("Silver is turned off");//}
+            LOGGER.info("Silver is turned off");}
 
     }
 
@@ -155,11 +155,11 @@ public final class LightController {
         this.lastStatusAmethystReading = thatReading ;
 
         LOGGER.info("System - lastStatusAmethystReading : "+(System.currentTimeMillis() - lastStatusAmethystReading));
-            /*
+
         if(System.currentTimeMillis() - lastStatusAmethystReading > 2100000 )
-        {controlLight(false, 3);
+        {/*controlLight(false, 3);
             isAmethystLocked = true;             */
-            LOGGER.info("Amethyst is turned off");//}
+            LOGGER.info("Amethyst is turned off");}
 
     }
 
@@ -167,11 +167,11 @@ public final class LightController {
         this.lastStatusBlancoReading = thatReading ;
 
         LOGGER.info("System - lastStatusBlancoReading : "+(System.currentTimeMillis() - lastStatusBlancoReading));
-          /*
+
         if(System.currentTimeMillis() - lastStatusBlancoReading > 2100000 )
-        {controlLight(false, 2);
+        {/*controlLight(false, 2);
             isBlancoLocked = true;*/
-            LOGGER.info("Blanco is turned off");//}
+            LOGGER.info("Blanco is turned off");}
 
     }
 
@@ -180,12 +180,12 @@ public final class LightController {
         this.lastStatusYellowReading = thatReading ;
 
         LOGGER.info("System - lastStatusYellowReading : "+(System.currentTimeMillis() - lastStatusYellowReading));
-          /*
+
         if(System.currentTimeMillis() - lastStatusYellowReading > 2100000 )
-        {controlLight(false, 1); 
+        {/*controlLight(false, 1);
          isYellowLocked = true;
          */
-            LOGGER.info("Yellow is turned off");//}
+            LOGGER.info("Yellow is turned off");}
 
     }
 
