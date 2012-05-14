@@ -31,6 +31,12 @@ public class MainApp {
     //0xca3
     public static final String SENSOR_LIGHT_EXT_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:0x585/capability/urn:wisebed:node:capability:light/latestreading";
 
+    public static final String STATUS_SILVER_REST = "http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:silver/capability/urn:ctinetwork:node:capability:status/latestreading";
+
+    public static final String STATUS_AMETHYST_REST = "http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:amethyst/capability/urn:ctinetwork:node:capability:status/latestreading";
+
+    public static final String STATUS_BLANCO_REST = "http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:blanco/capability/urn:ctinetwork:node:capability:status/latestreading";
+
     public static final String STATUS_YELLOW_REST = "http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:yellow/capability/urn:ctinetwork:node:capability:status/latestreading";
 
     public static final String SENSOR_SCREENLOCK_AMETHYST_REST = "http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:amethyst/capability/urn:ctinetwork:node:capability:lockScreen/latestreading";

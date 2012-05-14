@@ -55,7 +55,13 @@ public final class LightController {
 
     private double lastLumReading;
 
-    private double lastStatusReading;
+    private double lastStatusSilverReading;
+
+    private double lastStatusAmethystReading;
+
+    private double lastStatusBlancoReading;
+
+    private double lastStatusYellowReading;
 
     private long lastPirReading;
 
@@ -94,7 +100,10 @@ public final class LightController {
         setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
         setBlancoLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]) == 1);
         setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
-        setLastStatusReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
+        setLastStatusSilverReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
+        setLastStatusAmethystReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
+        setLastStatusBlancoReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
+        setLastStatusYellowReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isYellowLocked -- " + isYellowLocked);
@@ -112,10 +121,15 @@ public final class LightController {
         //Subscription for notifications.
        // WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
+
         WSReadingsClient.getInstance().subscribe(MainApp.URN_AMETHYST, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SILVER, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_BLANCO, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_YELLOW, MainApp.CAPABILITY_SCREENLOCK);
+
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SILVER, MainApp.CAPABILITY_STATUS);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_BLANCO, MainApp.CAPABILITY_STATUS);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_AMETHYST, MainApp.CAPABILITY_STATUS);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_YELLOW, MainApp.CAPABILITY_STATUS);
 
         //Adding Observer for the last readings
@@ -125,11 +139,41 @@ public final class LightController {
 
     }
 
+    public void setLastStatusSilverReading(final double thatReading){
+        this.lastStatusSilverReading = thatReading ;
 
-    public void setLastStatusReading(final double thatReading){
-        this.lastStatusReading = thatReading ;
+        if(System.currentTimeMillis() - lastStatusSilverReading > 2100000 )
+        {controlLight(false, 4);
+            isSilverLocked = true;
+            LOGGER.info("Silver is turned off");}
 
-        if(System.currentTimeMillis() - lastStatusReading > 2100000 )
+    }
+
+    public void setLastStatusAmethystReading(final double thatReading){
+        this.lastStatusAmethystReading = thatReading ;
+
+        if(System.currentTimeMillis() - lastStatusAmethystReading > 2100000 )
+        {controlLight(false, 3);
+            isAmethystLocked = true;
+            LOGGER.info("Amethyst is turned off");}
+
+    }
+
+    public void setLastStatusBlancoReading(final double thatReading){
+        this.lastStatusBlancoReading = thatReading ;
+
+        if(System.currentTimeMillis() - lastStatusBlancoReading > 2100000 )
+        {controlLight(false, 2);
+            isBlancoLocked = true;
+            LOGGER.info("Blanco is turned off");}
+
+    }
+
+
+    public void setLastStatusYellowReading(final double thatReading){
+        this.lastStatusYellowReading = thatReading ;
+
+        if(System.currentTimeMillis() - lastStatusYellowReading > 2100000 )
         {controlLight(false, 1); 
          isYellowLocked = true;
             LOGGER.info("Yellow is turned off");}
