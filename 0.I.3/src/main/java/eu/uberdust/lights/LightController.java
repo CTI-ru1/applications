@@ -142,30 +142,36 @@ public final class LightController {
     public void setLastStatusSilverReading(final double thatReading){
         this.lastStatusSilverReading = thatReading ;
 
+        LOGGER.info("System - lastStatusSilverReading : "+(System.currentTimeMillis() - lastStatusSilverReading));
+        /*
         if(System.currentTimeMillis() - lastStatusSilverReading > 2100000 )
         {controlLight(false, 4);
-            isSilverLocked = true;
-            LOGGER.info("Silver is turned off");}
+            isSilverLocked = true;       */
+            LOGGER.info("Silver is turned off");//}
 
     }
 
     public void setLastStatusAmethystReading(final double thatReading){
         this.lastStatusAmethystReading = thatReading ;
 
+        LOGGER.info("System - lastStatusAmethystReading : "+(System.currentTimeMillis() - lastStatusAmethystReading));
+            /*
         if(System.currentTimeMillis() - lastStatusAmethystReading > 2100000 )
         {controlLight(false, 3);
-            isAmethystLocked = true;
-            LOGGER.info("Amethyst is turned off");}
+            isAmethystLocked = true;             */
+            LOGGER.info("Amethyst is turned off");//}
 
     }
 
     public void setLastStatusBlancoReading(final double thatReading){
         this.lastStatusBlancoReading = thatReading ;
 
+        LOGGER.info("System - lastStatusBlancoReading : "+(System.currentTimeMillis() - lastStatusBlancoReading));
+          /*
         if(System.currentTimeMillis() - lastStatusBlancoReading > 2100000 )
         {controlLight(false, 2);
-            isBlancoLocked = true;
-            LOGGER.info("Blanco is turned off");}
+            isBlancoLocked = true;*/
+            LOGGER.info("Blanco is turned off");//}
 
     }
 
@@ -173,11 +179,14 @@ public final class LightController {
     public void setLastStatusYellowReading(final double thatReading){
         this.lastStatusYellowReading = thatReading ;
 
+        LOGGER.info("System - lastStatusYellowReading : "+(System.currentTimeMillis() - lastStatusYellowReading));
+          /*
         if(System.currentTimeMillis() - lastStatusYellowReading > 2100000 )
         {controlLight(false, 1); 
          isYellowLocked = true;
-            LOGGER.info("Yellow is turned off");}
-        
+         */
+            LOGGER.info("Yellow is turned off");//}
+
     }
 
 
