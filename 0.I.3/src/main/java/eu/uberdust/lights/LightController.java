@@ -10,6 +10,7 @@ import eu.uberdust.lights.tasks.TurnOffTask_4;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.util.HashMap;
 import java.util.Timer;
 
 /**
@@ -55,14 +56,6 @@ public final class LightController {
 
     private double lastLumReading;
 
-    private double lastStatusSilverReading;
-
-    private double lastStatusAmethystReading;
-
-    private double lastStatusBlancoReading;
-
-    private double lastStatusYellowReading;
-
     private long lastPirReading;
 
     private long zone1TurnedOnTimestamp = 0;
@@ -70,6 +63,8 @@ public final class LightController {
     private long zone2TurnedOnTimestamp = 0;
 
     private long firstCall = 0;
+    
+    private final HashMap<String,Double> lastStatus= new HashMap<String, Double>();
 
     /**
      * LightController is loaded on the first execution of LightController.getInstance()
@@ -95,15 +90,17 @@ public final class LightController {
         timer = new Timer();
 
         //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
-        setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
-        setAmethystLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_SILVER_REST).split("\t")[1]) == 1);
-        setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
+
+        setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_SILVER_REST).split("\t")[1]) == 1);
+        setAmethystLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
         setBlancoLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]) == 1);
         setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
-        setLastStatusSilverReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
-        setLastStatusAmethystReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
-        setLastStatusBlancoReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
-        setLastStatusYellowReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
+        //setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
+
+        setLastStatus("silver", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
+        setLastStatus("amethyst", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
+        setLastStatus("blanco", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
+        setLastStatus("yellow", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isYellowLocked -- " + isYellowLocked);
@@ -115,7 +112,7 @@ public final class LightController {
         zone3 = false;
         flag = false;
 
-
+       /*
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
         //Subscription for notifications.
@@ -136,58 +133,20 @@ public final class LightController {
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
 
         timer.schedule(new KeepLightsOn(timer), KeepLightsOn.DELAY);
-
+         */
     }
 
-    public void setLastStatusSilverReading(final double thatReading){
-        this.lastStatusSilverReading = thatReading ;
+    public void setLastStatus(final String name, final Double status) {
+        lastStatus.put(name,status);
 
-        LOGGER.info("System - lastStatusSilverReading : "+(System.currentTimeMillis() - lastStatusSilverReading));
+        LOGGER.info("System - lastStatusReading -- " + name +" : "+(System.currentTimeMillis() - status));
 
-        if(System.currentTimeMillis() - lastStatusSilverReading > 2100000 )
-        {/*controlLight(false, 4);
-            isSilverLocked = true;       */
-            LOGGER.info("Silver is turned off");}
-
-    }
-
-    public void setLastStatusAmethystReading(final double thatReading){
-        this.lastStatusAmethystReading = thatReading ;
-
-        LOGGER.info("System - lastStatusAmethystReading : "+(System.currentTimeMillis() - lastStatusAmethystReading));
-
-        if(System.currentTimeMillis() - lastStatusAmethystReading > 2100000 )
+        if(System.currentTimeMillis() - status > 2100000 )
         {/*controlLight(false, 3);
             isAmethystLocked = true;             */
-            LOGGER.info("Amethyst is turned off");}
-
+            LOGGER.info(name+ " is turned off");}
     }
 
-    public void setLastStatusBlancoReading(final double thatReading){
-        this.lastStatusBlancoReading = thatReading ;
-
-        LOGGER.info("System - lastStatusBlancoReading : "+(System.currentTimeMillis() - lastStatusBlancoReading));
-
-        if(System.currentTimeMillis() - lastStatusBlancoReading > 2100000 )
-        {/*controlLight(false, 2);
-            isBlancoLocked = true;*/
-            LOGGER.info("Blanco is turned off");}
-
-    }
-
-
-    public void setLastStatusYellowReading(final double thatReading){
-        this.lastStatusYellowReading = thatReading ;
-
-        LOGGER.info("System - lastStatusYellowReading : "+(System.currentTimeMillis() - lastStatusYellowReading));
-
-        if(System.currentTimeMillis() - lastStatusYellowReading > 2100000 )
-        {/*controlLight(false, 1);
-         isYellowLocked = true;
-         */
-            LOGGER.info("Yellow is turned off");}
-
-    }
 
 
     public void setLastLumReading(final double thatReading) {
@@ -225,7 +184,7 @@ public final class LightController {
     }
 
 
-    public void setAmethystLocked(final boolean screenLocked) {
+    public synchronized void setAmethystLocked(final boolean screenLocked) {
         this.isAmethystLocked = screenLocked;
 
         if (!isAmethystLocked) {
@@ -239,7 +198,7 @@ public final class LightController {
 
     }
 
-    public void setSilverLocked(final boolean screenLocked) {
+    public synchronized void setSilverLocked(final boolean screenLocked) {
         this.isSilverLocked = screenLocked;
 
         if (!isSilverLocked) {
@@ -252,7 +211,7 @@ public final class LightController {
         }
     }
 
-    public void setBlancoLocked(final boolean screenLocked) {
+    public synchronized void setBlancoLocked(final boolean screenLocked) {
         this.isBlancoLocked = screenLocked;
 
         if (!isBlancoLocked) {
@@ -265,7 +224,7 @@ public final class LightController {
         }
     }
 
-    public void setYellowLocked(final boolean screenLocked) {
+    public synchronized void setYellowLocked(final boolean screenLocked) {
         this.isYellowLocked = screenLocked;
 
         if (!isYellowLocked) {
@@ -384,4 +343,3 @@ public final class LightController {
     }
 
 }
-

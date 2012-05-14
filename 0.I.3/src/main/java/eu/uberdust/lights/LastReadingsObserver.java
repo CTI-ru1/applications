@@ -91,16 +91,7 @@ public class LastReadingsObserver implements Observer {
                 
                 LOGGER.info("New Reading for Status Capability of "+node+": "+value);
 
-                if (node.equals("amethyst")) {
-                    LightController.getInstance().setLastStatusAmethystReading(value);
-                } else if (node.equals("silver")) {
-                    LightController.getInstance().setLastStatusSilverReading(value);
-                } else if (node.equals("blanco")) {
-                    LightController.getInstance().setLastStatusBlancoReading(value);
-                } else if (node.equals("yellow")) {
-                    LightController.getInstance().setLastStatusYellowReading(value);
-                }
-
+                LightController.getInstance().setLastStatus(node, value);
             }
         }
     }
