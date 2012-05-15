@@ -3,10 +3,7 @@ package eu.uberdust.lights;
 import eu.uberdust.MainApp;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
-import eu.uberdust.lights.tasks.KeepLightsOn;
-import eu.uberdust.lights.tasks.TurnOffTask_2;
-import eu.uberdust.lights.tasks.TurnOffTask_3;
-import eu.uberdust.lights.tasks.TurnOffTask_4;
+import eu.uberdust.lights.tasks.*;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -27,7 +24,7 @@ public final class LightController {
 
     private boolean zone2;
 
-    private boolean zone3;
+    private boolean zone5;
 
     private boolean isAmethystLocked;
 
@@ -40,6 +37,14 @@ public final class LightController {
     private boolean flag;
 
     public static final int MAX_TRIES = 3;
+
+    public static double[] Lum = new double[4];
+
+    private static int i = 0;
+    
+
+
+    
 
 
     /**
@@ -54,7 +59,7 @@ public final class LightController {
 
     public static final double LUM_THRESHOLD_1 = 350;                   //350
 
-    private double lastLumReading;
+    private double lastLumReading = 0;
 
     private long lastPirReading;
 
@@ -64,7 +69,11 @@ public final class LightController {
 
     private long firstCall = 0;
     
-    private final HashMap<String,Double> lastStatus= new HashMap<String, Double>();
+    private final HashMap<String,Long> lastStatus= new HashMap<String, Long>();
+
+    private final HashMap<String,Integer> ZoneMap= new HashMap<String, Integer>();
+
+    
 
     /**
      * LightController is loaded on the first execution of LightController.getInstance()
@@ -91,16 +100,17 @@ public final class LightController {
 
         //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
 
+        setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
         setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_SILVER_REST).split("\t")[1]) == 1);
         setAmethystLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
         setBlancoLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]) == 1);
         setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
-        //setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
 
-        setLastStatus("silver", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
-        setLastStatus("amethyst", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
-        setLastStatus("blanco", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
-        setLastStatus("yellow", Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
+
+        setLastStatus("silver", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
+        setLastStatus("amethyst", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
+        setLastStatus("blanco", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
+        setLastStatus("yellow", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isYellowLocked -- " + isYellowLocked);
@@ -109,47 +119,84 @@ public final class LightController {
         LOGGER.info("isSilverLocked -- " + isSilverLocked);
         zone1 = false;
         zone2 = false;
-        zone3 = false;
+        zone5 = false;
         flag = false;
 
-       /*
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
         //Subscription for notifications.
-       // WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
 
         WSReadingsClient.getInstance().subscribe(MainApp.URN_AMETHYST, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SILVER, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_BLANCO, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_YELLOW, MainApp.CAPABILITY_SCREENLOCK);
-
+        /*
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SILVER, MainApp.CAPABILITY_STATUS);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_BLANCO, MainApp.CAPABILITY_STATUS);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_AMETHYST, MainApp.CAPABILITY_STATUS);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_YELLOW, MainApp.CAPABILITY_STATUS);
+        */
 
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
 
         timer.schedule(new KeepLightsOn(timer), KeepLightsOn.DELAY);
-         */
+        timer.schedule(new LogOutTask(timer), LogOutTask.DELAY);
+
     }
 
-    public void setLastStatus(final String name, final Double status) {
+    public void setLastStatus(final String name, final long status) {
         lastStatus.put(name,status);
 
         LOGGER.info("System - lastStatusReading -- " + name +" : "+(System.currentTimeMillis() - status));
+     
 
         if(System.currentTimeMillis() - status > 2100000 )
-        {/*controlLight(false, 3);
-            isAmethystLocked = true;             */
+        {
+            if (name.equals("amethyst")) {
+                controlLight(false, 3);
+                isAmethystLocked = true;
+            } else if (name.equals("silver")) {
+                controlLight(false, 4);
+                isSilverLocked = true;
+            } else if (name.equals("blanco")) {
+                controlLight(false, 2);
+                isBlancoLocked = true;
+            } else if (name.equals("yellow")) {
+                controlLight(false, 1);
+                isYellowLocked = true;
+            }
+
             LOGGER.info(name+ " is turned off");}
     }
 
 
 
     public void setLastLumReading(final double thatReading) {
+
+      /*  double sum = 0;
+
+        LOGGER.info(" i : "+i);
+
+        if(i >= 4)
+        i = 0;
+
+        LOGGER.info("thatReading : "+thatReading);
+        Lum[i] = thatReading;
+        i++;
+
+        LOGGER.info(" i : "+i);
+        
+        for(int k=0; k<=3; k++){
+            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+            sum+=Lum[k];
+        }
+
+        LOGGER.info("Median : "+(sum/4));       */
+
         this.lastLumReading = thatReading;
 
         if (lastLumReading < LUM_THRESHOLD_1) {
@@ -165,6 +212,7 @@ public final class LightController {
             if (!isSilverLocked) {
                 controlLight(true, 4);
             }
+
         } else {
             controlLight(false, -1);
         }
@@ -268,7 +316,7 @@ public final class LightController {
             firstCall = lastPirReading;
             flag = true;
             timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
-        } else if (!zone1) {
+        } else if (!zone5) {
             LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
             if (lastPirReading - firstCall > 15000) {
                 controlLight(true, 5);
@@ -299,8 +347,8 @@ public final class LightController {
         return zone1;
     }
 
-    public boolean isZone2() {
-        return zone2;
+    public boolean isZone5() {
+        return zone5;
     }
 
     public synchronized void controlLight(final boolean value, final int zone) {
@@ -308,8 +356,8 @@ public final class LightController {
             zone1 = value;
         } else if (zone == 2) {
             zone2 = value;
-        } else {
-            zone3 = value;
+        } else if(zone == 5) {
+            zone5 = value;
         }
 
         final String zonef;

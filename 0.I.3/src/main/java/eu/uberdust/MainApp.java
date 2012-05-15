@@ -27,7 +27,7 @@ public class MainApp {
 
     public static final String CAPABILITY_STATUS ="urn:ctinetwork:node:capability:status";
     //0xca3    //giannhs 0x99c , kouzina 0x494 h 0x1ccd
-    public static final String SENSOR_PIR_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:0x585/capability/urn:wisebed:node:capability:pir/latestreading";
+    public static final String SENSOR_PIR_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:0x42f/capability/urn:wisebed:node:capability:pir/latestreading";
     //0xca3
     public static final String SENSOR_LIGHT_EXT_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:0x585/capability/urn:wisebed:node:capability:light/latestreading";
 

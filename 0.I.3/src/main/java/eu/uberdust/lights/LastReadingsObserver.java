@@ -88,10 +88,11 @@ public class LastReadingsObserver implements Observer {
 
                 final String node = "" + reading.getNode().split(":")[2];
                 final Double value = reading.getDoubleReading();
+                final long timeStmp = reading.getTimestamp();
                 
                 LOGGER.info("New Reading for Status Capability of "+node+": "+value);
 
-                LightController.getInstance().setLastStatus(node, value);
+                LightController.getInstance().setLastStatus(node, timeStmp);
             }
         }
     }

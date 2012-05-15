@@ -31,7 +31,7 @@ public class TurnOffTask_4 extends TimerTask {
 
         LOGGER.info("TurnOffTask_4: initialized");
 
-        if (LightController.getInstance().isZone1()) {
+        if (LightController.getInstance().isZone5()) {
 
             if (System.currentTimeMillis() - LightController.getInstance().getLastPirReading() > DELAY) {
                 LOGGER.info("TurnOffTask_4: Turn off zone 1");
