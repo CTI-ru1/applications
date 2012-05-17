@@ -92,7 +92,7 @@ public class LastReadingsObserver implements Observer {
                 
                 LOGGER.info("New Reading for Status Capability of "+node+": "+value);
 
-                LightController.getInstance().setLastStatus(node, timeStmp);
+               // LightController.getInstance().setLastStatus(node, timeStmp);
             }
         }
     }
