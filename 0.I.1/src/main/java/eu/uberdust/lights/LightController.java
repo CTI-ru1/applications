@@ -31,6 +31,12 @@ public final class LightController {
 
     public static final int MAX_TRIES = 3;
 
+    public static final int WINDOW = 10;
+
+    public static double[] Lum = new double[WINDOW];
+
+    private static int i = WINDOW-1;
+
 
     /**
      * Pir timer.
@@ -47,6 +53,8 @@ public final class LightController {
     public static final double LUM_THRESHOLD_2 = 200;                         //200
 
     private double lastLumReading;
+
+    private double Median;
 
     private long lastPirReading;
 
@@ -80,6 +88,7 @@ public final class LightController {
         timer = new Timer();
 
         //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
+        setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
         setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
         setScreenLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1);
 
@@ -106,19 +115,30 @@ public final class LightController {
 
     }
 
+    public void setLum(final String readings){
+
+        for(int k=0,j=1; k<=WINDOW-1; k++,j=j+3){
+
+            Lum[k] = Double.valueOf(readings.split("\t")[j]);
+            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+
+        }
+
+    }
+
 
     public void setLastLumReading(final double thatReading) {
         this.lastLumReading = thatReading;
 
         if (!isScreenLocked) {
 
-            if (lastLumReading < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2) {
+            if (Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2) {
                 controlLight(true, 3);
 
-            } else if (lastLumReading < LUM_THRESHOLD_2) {
+            } else if (Median < LUM_THRESHOLD_2) {
                 controlLight(true, 2);
                 controlLight(true, 3);
-            } else if (lastLumReading > LUM_THRESHOLD_1) {
+            } else if (Median > LUM_THRESHOLD_1) {
                 controlLight(false, -1);
             }
         }
@@ -152,15 +172,19 @@ public final class LightController {
         return this.lastLumReading;
     }
 
+    public double getMedian() {
+        return this.Median;
+    }
+
     public long getZone2TurnedOnTimestamp() {
         return this.zone2TurnedOnTimestamp;
     }
 
     public synchronized void updateLight3() {
         if (!isScreenLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2) {
+            if (Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2) {
                 controlLight(true, 3);
-            } else if (lastLumReading < LUM_THRESHOLD_2) {
+            } else if (Median < LUM_THRESHOLD_2) {
                 controlLight(true, 2);
                 controlLight(true, 3);
             }
@@ -177,7 +201,7 @@ public final class LightController {
 
         if (isScreenLocked) {
 
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 //turn on lights
                 turnOnLights();
 
@@ -188,7 +212,7 @@ public final class LightController {
 
         } else if (!isScreenLocked) {
 
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
 
                 turnOnLight_1();
 
@@ -268,7 +292,7 @@ public final class LightController {
         
         if(zone == -1){zonef = "ff";}
         else{zonef = ""+zone;}
-        
+
         final String link = new StringBuilder(MainApp.LIGHT_CONTROLLER).append(zonef).append(",").append(value ? 1 : 0).toString();
 
         LOGGER.info(link);

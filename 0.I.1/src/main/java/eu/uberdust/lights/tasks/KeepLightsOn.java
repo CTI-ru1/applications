@@ -34,7 +34,7 @@ public class KeepLightsOn extends TimerTask {
         LOGGER.info("KeepLightsOn: initiated");
 
         if (!LightController.getInstance().isScreenLocked()) {
-            if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1 && LightController.getInstance().getLastLumReading() > LightController.LUM_THRESHOLD_2) {
+            if (LightController.getInstance().getMedian() < LightController.LUM_THRESHOLD_1 && LightController.getInstance().getLastLumReading() > LightController.LUM_THRESHOLD_2) {
                 LightController.getInstance().controlLight(true, 3);
 
             } else if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_2) {
