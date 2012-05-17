@@ -36,10 +36,12 @@ public class LogOutTask extends TimerTask{
     @Override
     public final void run() {
         LOGGER.info("LogOutTask: Initiated ");
+       /*
         LightController.getInstance().setLastStatus("silver", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
         LightController.getInstance().setLastStatus("amethyst", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
         LightController.getInstance().setLastStatus("blanco", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
         LightController.getInstance().setLastStatus("yellow", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
+        */
         this.timer.schedule(new LogOutTask(timer), DELAY);
     }
 

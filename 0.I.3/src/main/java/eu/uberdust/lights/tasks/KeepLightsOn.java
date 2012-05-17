@@ -40,7 +40,7 @@ public class KeepLightsOn extends TimerTask {
         LOGGER.info("KeepLightsOn: isSilverLocked -- "+LightController.getInstance().isSilverLocked());
 
 
-        if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1) {
+        if (LightController.getInstance().getMedian() < LightController.LUM_THRESHOLD_1) {
             if (!LightController.getInstance().isYellowLocked()) {
                 LightController.getInstance().controlLight(true, 1);
             }

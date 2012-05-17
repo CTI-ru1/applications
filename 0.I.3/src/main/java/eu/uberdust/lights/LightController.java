@@ -38,9 +38,11 @@ public final class LightController {
 
     public static final int MAX_TRIES = 3;
 
-    public static double[] Lum = new double[4];
+    public static final int WINDOW = 10;
 
-    private static int i = 0;
+    public static double[] Lum = new double[WINDOW];
+
+    private static int i = WINDOW-1;
     
 
 
@@ -60,6 +62,8 @@ public final class LightController {
     public static final double LUM_THRESHOLD_1 = 350;                   //350
 
     private double lastLumReading = 0;
+
+    private double Median;
 
     private long lastPirReading;
 
@@ -100,17 +104,19 @@ public final class LightController {
 
         //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
 
+        setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
         setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
         setSilverLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_SILVER_REST).split("\t")[1]) == 1);
         setAmethystLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMETHYST_REST).split("\t")[1]) == 1);
         setBlancoLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BLANCO_REST).split("\t")[1]) == 1);
         setYellowLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_YELLOW_REST).split("\t")[1]) == 1);
 
-
+        /*
         setLastStatus("silver", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_SILVER_REST).split("\t")[0]));
         setLastStatus("amethyst", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_AMETHYST_REST).split("\t")[0]));
         setLastStatus("blanco", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_BLANCO_REST).split("\t")[0]));
         setLastStatus("yellow", Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.STATUS_YELLOW_REST).split("\t")[0]));
+        */
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isYellowLocked -- " + isYellowLocked);
@@ -144,9 +150,21 @@ public final class LightController {
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
 
         timer.schedule(new KeepLightsOn(timer), KeepLightsOn.DELAY);
-        timer.schedule(new LogOutTask(timer), LogOutTask.DELAY);
+       // timer.schedule(new LogOutTask(timer), LogOutTask.DELAY);
 
     }
+
+    public void setLum(final String readings){
+
+        for(int k=0,j=1; k<=WINDOW-1; k++,j=j+3){
+
+            Lum[k] = Double.valueOf(readings.split("\t")[j]);
+            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+
+        }
+
+    }
+    /*
 
     public void setLastStatus(final String name, final long status) {
         lastStatus.put(name,status);
@@ -173,33 +191,36 @@ public final class LightController {
             LOGGER.info(name+ " is turned off");}
     }
 
-
+      */
 
     public void setLastLumReading(final double thatReading) {
 
-      /*  double sum = 0;
+        double sum = 0;
 
         LOGGER.info(" i : "+i);
 
-        if(i >= 4)
-        i = 0;
+        if(i == 0) {
+            Lum[i] = thatReading;
+            i = WINDOW-1;
+        } else {
+            Lum[i] = thatReading;
+            i--;
+        }
 
         LOGGER.info("thatReading : "+thatReading);
-        Lum[i] = thatReading;
-        i++;
-
         LOGGER.info(" i : "+i);
-        
-        for(int k=0; k<=3; k++){
+
+        for(int k=0; k<=WINDOW-1; k++){
             LOGGER.info("Lum["+k+"]: "+Lum[k]);
             sum+=Lum[k];
         }
 
-        LOGGER.info("Median : "+(sum/4));       */
+        LOGGER.info("Median : "+(sum/WINDOW));
+        this.Median = sum/WINDOW    ;
 
         this.lastLumReading = thatReading;
 
-        if (lastLumReading < LUM_THRESHOLD_1) {
+        if (Median < LUM_THRESHOLD_1) {
             if (!isYellowLocked) {
                 controlLight(true, 1);
             }
@@ -236,7 +257,7 @@ public final class LightController {
         this.isAmethystLocked = screenLocked;
 
         if (!isAmethystLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 controlLight(true, 3);
             }
         } else if (isAmethystLocked) {
@@ -250,7 +271,7 @@ public final class LightController {
         this.isSilverLocked = screenLocked;
 
         if (!isSilverLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 controlLight(true, 4);
             }
         } else if (isSilverLocked) {
@@ -263,7 +284,7 @@ public final class LightController {
         this.isBlancoLocked = screenLocked;
 
         if (!isBlancoLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 controlLight(true, 2);
             }
         } else if (isBlancoLocked) {
@@ -276,7 +297,7 @@ public final class LightController {
         this.isYellowLocked = screenLocked;
 
         if (!isYellowLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 controlLight(true, 1);
             }
         } else if (isYellowLocked) {
@@ -293,10 +314,14 @@ public final class LightController {
         return this.lastLumReading;
     }
 
+    public double getMedian() {
+        return this.Median;
+    }
+
 
     public synchronized void updateLightsState() {
 
-        if (lastLumReading < LUM_THRESHOLD_1) {
+        if (Median < LUM_THRESHOLD_1) {
             //turn on lights
             turnOnLight_1();
 
