@@ -128,6 +128,29 @@ public final class LightController {
 
 
     public void setLastLumReading(final double thatReading) {
+        double sum = 0;
+
+        LOGGER.info(" i : "+i);
+
+        if(i == 0) {
+            Lum[i] = thatReading;
+            i = WINDOW-1;
+        } else {
+            Lum[i] = thatReading;
+            i--;
+        }
+
+        LOGGER.info("thatReading : "+thatReading);
+        LOGGER.info(" i : "+i);
+
+        for(int k=0; k<=WINDOW-1; k++){
+            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+            sum+=Lum[k];
+        }
+
+        LOGGER.info("Median : "+(sum/WINDOW));
+        this.Median = sum/WINDOW    ;
+
         this.lastLumReading = thatReading;
 
         if (!isScreenLocked) {
