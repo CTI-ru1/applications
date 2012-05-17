@@ -33,7 +33,7 @@ public class KeepLightsOn extends TimerTask {
     public void run() {
         LOGGER.info("KeepLightsOn: initiated");
 
-        if (LightController.getInstance().getLastLumReading() < LightController.LUM_THRESHOLD_1) {
+        if (LightController.getInstance().getMedian() < LightController.LUM_THRESHOLD_1) {
             if (!LightController.getInstance().isBrownLocked()) {
                 LightController.getInstance().controlLight(true, 5);
             }

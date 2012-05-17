@@ -26,7 +26,7 @@ public final class LightController {
 
     private boolean zone2;
 
-    private boolean zone3;
+    private boolean zone4;
 
     private boolean isBrownLocked;
 
@@ -37,6 +37,13 @@ public final class LightController {
     private boolean flag;
 
     public static final int MAX_TRIES = 3;
+
+    public static final int WINDOW = 10;
+
+    public static double[] Lum = new double[WINDOW];
+
+    private static int i = WINDOW-1;
+
 
 
     /**
@@ -52,6 +59,8 @@ public final class LightController {
     public static final double LUM_THRESHOLD_1 = 350;                       //350
 
     private double lastLumReading;
+
+    private double Median;    
 
     private long lastPirReading;
 
@@ -84,10 +93,10 @@ public final class LightController {
         LOGGER.info("Light Controller initialized");
         timer = new Timer();
 
+        setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
         //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
         setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
-        //setBrownLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BROWN_REST).split("\t")[1]) == 1);
-        setBrownLocked(true);
+        setBrownLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BROWN_REST).split("\t")[1]) == 1);
         setAmberLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMBER_REST).split("\t")[1]) == 1);
         //setMoinLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_MOIN_REST).split("\t")[1]) == 1);
         setMoinLocked(true);
@@ -100,7 +109,7 @@ public final class LightController {
 
         zone1 = false;
         zone2 = false;
-        zone3 = false;
+        zone4 = false;
         flag = false;
 
 
@@ -121,11 +130,45 @@ public final class LightController {
 
     }
 
+    public void setLum(final String readings){
+
+        for(int k=0,j=1; k<=WINDOW-1; k++,j=j+3){
+
+            Lum[k] = Double.valueOf(readings.split("\t")[j]);
+            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+
+        }
+
+    }
+
 
     public void setLastLumReading(final double thatReading) {
+          double sum = 0;
+
+        LOGGER.info(" i : "+i);
+
+        if(i == 0) {
+            Lum[i] = thatReading;            
+            i = WINDOW-1;
+        } else {
+            Lum[i] = thatReading;
+            i--;
+        }
+
+        LOGGER.info("thatReading : "+thatReading);
+        LOGGER.info(" i : "+i);
+
+        for(int k=0; k<=WINDOW-1; k++){
+            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+            sum+=Lum[k];
+        }
+
+        LOGGER.info("Median : "+(sum/WINDOW));
+        this.Median = sum/WINDOW    ;
+
         this.lastLumReading = thatReading;
 
-        if (lastLumReading < LUM_THRESHOLD_1) {
+        if (Median < LUM_THRESHOLD_1) {
             if (!isBrownLocked) {
                 controlLight(true, 5);
             }
@@ -159,7 +202,7 @@ public final class LightController {
         this.isBrownLocked = screenLocked;
 
         if (!isBrownLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median  < LUM_THRESHOLD_1) {
                 controlLight(true, 5);
             }
         } else if (isBrownLocked) {
@@ -173,7 +216,7 @@ public final class LightController {
         this.isAmberLocked = screenLocked;
 
         if (!isAmberLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 controlLight(true, 2);
             }
         } else if (isAmberLocked) {
@@ -186,7 +229,7 @@ public final class LightController {
         this.isMoinLocked = screenLocked;
 
         if (!isMoinLocked) {
-            if (lastLumReading < LUM_THRESHOLD_1) {
+            if (Median < LUM_THRESHOLD_1) {
                 controlLight(true, 1);
             }
         } else if (isMoinLocked) {
@@ -204,10 +247,14 @@ public final class LightController {
         return this.lastLumReading;
     }
 
+    public double getMedian() {
+        return this.Median;
+    }
+
 
     public synchronized void updateLightsState() {
 
-        if (lastLumReading < LUM_THRESHOLD_1) {
+        if (Median < LUM_THRESHOLD_1) {
             //turn on lights
             turnOnLight_1();
 
@@ -255,8 +302,8 @@ public final class LightController {
         return zone1;
     }
 
-    public boolean isZone2() {
-        return zone2;
+    public boolean isZone4() {
+        return zone4;
     }
 
     public synchronized void controlLight(final boolean value, final int zone) {
@@ -264,8 +311,8 @@ public final class LightController {
             zone1 = value;
         } else if (zone == 2) {
             zone2 = value;
-        } else {
-            zone3 = value;
+        } else if (zone == 4)  {
+            zone4 = value;
         }
 
         final String zonef;
@@ -299,4 +346,3 @@ public final class LightController {
     }
 
 }
-

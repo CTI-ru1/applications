@@ -36,6 +36,8 @@ public class MainApp {
     //0x99c
     public static final String LIGHT_CONTROLLER = "http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x2df/payload/7f,69,70,1,";
 
+    public static final String SENSOR_LIGHT_READINGS_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:0x1b77/capability/urn:wisebed:node:capability:light/tabdelimited/limit/"+LightController.WINDOW;
+
     public static void main(final String[] args) {
         LightController.getInstance();
     }
