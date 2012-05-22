@@ -228,10 +228,10 @@ public final class LightController {
                 //turn on lights
                 turnOnLights();
 
-            } else {
+            } /*else {
                 //turn off lights
                 controlLight(false, -1);
-            }
+            } */
 
         } else if (!isScreenLocked) {
 
@@ -239,10 +239,10 @@ public final class LightController {
 
                 turnOnLight_1();
 
-            } else {
+            } /*else {
                 //turn off lights
                 controlLight(false, -1);
-            }
+            }  */
 
         }
 
