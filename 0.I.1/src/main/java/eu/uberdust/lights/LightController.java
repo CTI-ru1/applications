@@ -341,4 +341,3 @@ public final class LightController {
     }
 
 }
-
