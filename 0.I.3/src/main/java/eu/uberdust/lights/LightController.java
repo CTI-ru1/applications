@@ -326,10 +326,10 @@ public final class LightController {
             turnOnLight_1();
 
 
-        } else {
+        } /*else {
             //turn off lights
             controlLight(false, -1);
-        }
+        }*/
 
     }
 
