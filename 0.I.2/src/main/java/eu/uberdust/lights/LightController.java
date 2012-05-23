@@ -96,10 +96,10 @@ public final class LightController {
         setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
         //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
         setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
-        setBrownLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BROWN_REST).split("\t")[1]) == 1);
-        setAmberLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMBER_REST).split("\t")[1]) == 1);
-        //setMoinLocked(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_MOIN_REST).split("\t")[1]) == 1);
-        setMoinLocked(true);
+        setBrownLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BROWN_REST).split("\t")[1]) == 1)||(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_BROWN_REST).split("\t")[1]) == 3));
+        setAmberLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMBER_REST).split("\t")[1]) == 1)||(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_AMBER_REST).split("\t")[1]) == 3));
+        setMoinLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_MOIN_REST).split("\t")[1]) == 1)||(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_MOIN_REST).split("\t")[1]) == 3));
+        //setMoinLocked(true);
 
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
