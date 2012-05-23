@@ -47,7 +47,7 @@ public class LastReadingsObserver implements Observer {
             if (reading.getCapability().equals(MainApp.CAPABILITY_SCREENLOCK)) {
                 LOGGER.info("New Reading for Screen Lock Capability");
 
-                final boolean isScreenLocked = reading.getDoubleReading() == 1;
+                final boolean isScreenLocked = ((reading.getDoubleReading() == 1)||(reading.getDoubleReading() == 3));
                 LOGGER.info(new StringBuilder().append("isScreenLocked: ")
                         .append(reading.getDoubleReading()).append(" -- ")
                         .append(isScreenLocked).toString());
