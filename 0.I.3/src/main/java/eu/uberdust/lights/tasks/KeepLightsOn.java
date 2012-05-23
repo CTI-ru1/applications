@@ -34,6 +34,7 @@ public class KeepLightsOn extends TimerTask {
     @Override
     public void run() {
         LOGGER.info("KeepLightsOn: initiated");
+        LOGGER.info("KeepLightsOn Lum:"+LightController.getInstance().getMedian());
         LOGGER.info("KeepLightsOn: isYellowLocked -- "+LightController.getInstance().isYellowLocked());
         LOGGER.info("KeepLightsOn: isBlancoLocked -- "+LightController.getInstance().isBlancoLocked());
         LOGGER.info("KeepLightsOn: isAmethystLocked -- "+LightController.getInstance().isAmethystLocked());
