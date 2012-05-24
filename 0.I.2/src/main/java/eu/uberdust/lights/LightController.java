@@ -116,7 +116,7 @@ public final class LightController {
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
         //Subscription for notifications.
-       // WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_BROWN, MainApp.CAPABILITY_SCREENLOCK);
         WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK_AMBER, MainApp.CAPABILITY_SCREENLOCK);
