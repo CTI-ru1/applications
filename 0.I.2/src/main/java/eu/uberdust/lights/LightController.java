@@ -26,7 +26,7 @@ public final class LightController {
 
     private boolean zone2;
 
-    private boolean zone4;
+    private boolean zone3;
 
     private boolean isBrownLocked;
 
@@ -109,7 +109,7 @@ public final class LightController {
 
         zone1 = false;
         zone2 = false;
-        zone4 = false;
+        zone3 = false;
         flag = false;
 
 
@@ -274,10 +274,10 @@ public final class LightController {
             firstCall = lastPirReading;
             flag = true;
             timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
-        } else if (!zone1) {
+        } else if (!zone3) {
             LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
             if (lastPirReading - firstCall > 15000) {
-                controlLight(true, 4);
+                controlLight(true, 3);
                 timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
             }
         }
@@ -302,8 +302,8 @@ public final class LightController {
         return zone1;
     }
 
-    public boolean isZone4() {
-        return zone4;
+    public boolean isZone3() {
+        return zone3;
     }
 
     public synchronized void controlLight(final boolean value, final int zone) {
@@ -311,8 +311,8 @@ public final class LightController {
             zone1 = value;
         } else if (zone == 2) {
             zone2 = value;
-        } else if (zone == 4)  {
-            zone4 = value;
+        } else if (zone == 3)  {
+            zone3 = value;
         }
 
         final String zonef;
