@@ -16,6 +16,7 @@
         <module>TraceParser</module>
         <module>EvaluationApp</module>
         <module>listenerWS</module>
+        <module>VirtualEntityManager</module>
     </modules>
 
     <name>Applications</name>
