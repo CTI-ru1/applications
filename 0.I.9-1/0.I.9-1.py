@@ -16,7 +16,7 @@ import message
 import urllib2
 import logging
 
-logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename='0.I.9-1.log',level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename='0.I.9-1.log',level=logging.INFO)
 
 #FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 #logging.basicConfig(format=FORMAT)
@@ -53,7 +53,7 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 			envelope = message.Envelope()
 			envelope.ParseFromString(wsmessage)
 			if envelope.type==1:
-				logging.debug(str(envelope.nodeReadings.reading[0].timestamp)+str(envelope.nodeReadings.reading[0].node))
+				logging.info(str(envelope.nodeReadings.reading[0].timestamp)+" "+str(envelope.nodeReadings.reading[0].node))
 				binary1=binary
 				# on received message
 				nowtime=envelope.nodeReadings.reading[0].timestamp/1000
@@ -61,14 +61,17 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 				if diff > 20 :
 					logging.info("turning on")
 					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,1")
-					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1")
+					#time.sleep(0.1)
+					#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1")
+					#time.sleep(0.1)
+					#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,2,1")
 					#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/1/")
 					#os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1 -O /dev/null")
 					#os.system("gntp-send '0.I.9-1' 'turning on'")
 					lasttime=nowtime
 					self.sendMessage(wsmessage, binary)
 		except :
-			logging.error("error in onMessage")
+			logging.debug("error in onMessage")
 	def onClose(self,wasClean, code, reason):
 		logging.info("onClose")
                 #os.system("gntp-send '0.I.9-1' 'onClose'")
@@ -87,7 +90,10 @@ def periodic_check( threadName, delay):
 		logging.info("diff is "+str(diff))
 		if diff >  delay:
 			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0")
-			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0")
+			#time.sleep(0.1)
+			#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0")
+			#time.sleep(0.1)
+			#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,2,0")
 			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light3/insert/timestamp/"+str(nowtime)+"/reading/0/")
 			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/0/")
                         #os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0 -O /dev/null")
@@ -109,7 +115,7 @@ def main(argv=None):
 
 		# parse options and args
 		opts, args = getopt.getopt(argv[1:], "", ["help","node=","capability="])
-		logging.debug("Node/Capability WebSocket consumer.")
+		logging.info("Node/Capability WebSocket consumer.")
 		for k,v in opts:
 			if k == "--help":
 				print "A simple python script for consuming readings for a specific Node/Capability pair.\nHit CTRL-C to stop script at any time.\nMust provide all of the parameters listed bellow :"
