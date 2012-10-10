@@ -1,6 +1,9 @@
 package eu.uberdust.lights;
 
+import ch.ethz.inf.vs.californium.coap.CodeRegistry;
+import ch.ethz.inf.vs.californium.coap.Request;
 import eu.uberdust.MainApp;
+import eu.uberdust.communication.rest.Converter;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import eu.uberdust.lights.tasks.*;
@@ -162,7 +165,11 @@ public final class LightController {
                 controlLight(true, 2);
                 controlLight(true, 3);
             } else if (Median > LUM_THRESHOLD_1) {
-                controlLight(false, -1);
+                //controlLight(false, -1);
+                controlLight(false, 1);
+                controlLight(false, 2);
+                controlLight(false, 3);
+
             }
         }
     }
@@ -311,16 +318,27 @@ public final class LightController {
             zone3 = value;
         }
         
-        final String zonef;
+        /*final String zonef;
         
         if(zone == -1){zonef = "ff";}
         else{zonef = ""+zone;}
 
-        final String link = new StringBuilder(MainApp.LIGHT_CONTROLLER).append(zonef).append(",").append(value ? 1 : 0).toString();
+        final String link = new StringBuilder(MainApp.LIGHT_CONTROLLER).append(zonef).append(",").append(value ? 1 : 0).toString();*/
 
-        LOGGER.info(link);
+        Request request = new Request(CodeRegistry.METHOD_POST, false);
+        request.setURI("/lz"+zone);
+        request.setPayload(String.valueOf(value));
+        request.toByteArray();
+        final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x99c/payload/7f,69,70,33");
+
+        int[] bytes = Converter.getInstance().ByteToInt(request.toByteArray());
+        for (int aByte : bytes) {
+            linkBuilder.append(",").append(Integer.toHexString(aByte));
+        }
+
+        LOGGER.info(linkBuilder.toString());
         try {
-            restCall(link);
+            restCall(linkBuilder.toString());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
