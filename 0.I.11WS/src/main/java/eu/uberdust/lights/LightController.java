@@ -1,5 +1,8 @@
 package eu.uberdust.lights;
 
+import ch.ethz.inf.vs.californium.coap.CodeRegistry;
+import ch.ethz.inf.vs.californium.coap.Request;
+import eu.uberdust.Converter;
 import eu.uberdust.communication.protobuf.Message;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
@@ -91,30 +94,41 @@ public final class LightController implements Observer {
     public void setLastReading(final long thatReading) {
         this.lastReading = thatReading;
         if (!zone1) {
-            controlLight(true, 1);
+            controlLight(true, 3);
             zone1TurnedOnTimestamp = thatReading;
             timer.schedule(new LightTask(timer), LightTask.DELAY);
         } else if (!zone2) {
-            controlLight(true, 1);
+            controlLight(true, 3);
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
                 controlLight(true, 2);
-                controlLight(true, 3);
+                controlLight(true, 1);
                 zone2TurnedOnTimestamp = thatReading;
             }
         } else {
             controlLight(true, 2);
-            controlLight(true, 3);
+            controlLight(true, 1);
         }
     }
 
 
     public void controlLight(final boolean value, final int zone) {
-        if (zone == 1) {
+        if (zone == 3) {
             zone1 = value;
         } else {
             zone2 = value;
         }
-        final StringBuilder linkBuilder = new StringBuilder(REST_LINK_PRE).append(zone).append(",3").append(value ? 1 : 0).append(REST_LINK_POST);
+
+        Request request = new Request(CodeRegistry.METHOD_POST, false);
+        request.setURI("/lz"+zone);
+        request.setPayload(String.valueOf(value));
+        request.toByteArray();
+        final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,33");
+
+        int[] bytes = Converter.getInstance().ByteToInt(request.toByteArray());
+        for (int aByte : bytes) {
+            linkBuilder.append(",").append(Integer.toHexString(aByte));
+        }
+        //final StringBuilder linkBuilder = new StringBuilder(REST_LINK_PRE).append(zone).append(",3").append(value ? 1 : 0).append(REST_LINK_POST);
 
         LOGGER.info(linkBuilder.toString());
         RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
