@@ -114,13 +114,13 @@ public final class LightController implements Observer {
     public void controlLight(final boolean value, final int zone) {
         if (zone == 3) {
             zone1 = value;
-        } else {
+        } else if (zone == 1) {
             zone2 = value;
         }
 
         Request request = new Request(CodeRegistry.METHOD_POST, false);
         request.setURI("/lz"+zone);
-        request.setPayload(String.valueOf(value));
+        request.setPayload(value ? "1" : "0");
         request.toByteArray();
         final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,33");
 
@@ -128,7 +128,6 @@ public final class LightController implements Observer {
         for (int aByte : bytes) {
             linkBuilder.append(",").append(Integer.toHexString(aByte));
         }
-        //final StringBuilder linkBuilder = new StringBuilder(REST_LINK_PRE).append(zone).append(",3").append(value ? 1 : 0).append(REST_LINK_POST);
 
         LOGGER.info(linkBuilder.toString());
         RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
