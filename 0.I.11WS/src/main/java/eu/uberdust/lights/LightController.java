@@ -28,14 +28,6 @@ public final class LightController implements Observer {
      */
     private static final Logger LOGGER = Logger.getLogger(LightController.class);
 
-
-    //    private final String REST_LINK =
-//            "http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,1,";
-    private final String REST_LINK_PRE =
-            "http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,33,51,2,ff,ff,93,6c,7a,3";
-    private final String REST_LINK_POST =
-            ",a,68,74";
-
     private boolean zone1;
 
     private boolean zone2;
@@ -82,8 +74,8 @@ public final class LightController implements Observer {
         zone2 = false;
         timer = new Timer();
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
-        // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x494", "urn:wisebed:node:capability:pir");
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
+       // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
+        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.11","urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().addObserver(this);
     }
 
@@ -149,12 +141,14 @@ public final class LightController implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
+        System.out.println("update");
         if (!(o instanceof WSReadingsClient)) {
             return;
         }
         if (!(arg instanceof Message.NodeReadings)) {
             return;
         }
+
         Message.NodeReadings readings = (Message.NodeReadings) arg;
         for (Message.NodeReadings.Reading reading : readings.getReadingList()) {
             LightController.getInstance().setLastReading(reading.getTimestamp());
