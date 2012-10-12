@@ -1,6 +1,7 @@
 package eu.uberdust;
 
 
+import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.tasks.VirtualNodeChecker;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -52,11 +53,11 @@ public final class VirtualNodeManager {
      */
     private VirtualNodeManager() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
-        LOGGER.info("Virtual Node Checker initialized");
 
+        UberdustClient.getInstance().setUberdustURL("http://uberdust.cti.gr/");
+        LOGGER.info("Virtual Node Checker initialized");
         timer = new Timer();
         timer.scheduleAtFixedRate(new VirtualNodeChecker(), 1000, 60000);
-//        (new VirtualNodeChecker()).run();
     }
 
     public static void main(final String[] args) {

@@ -166,7 +166,7 @@ public class VirtualNodeChecker extends TimerTask {
         String contents = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:room:0.I.1/rdf/rdf+xml/";
         String vitual = "virtual";
         if (contents.contains(vitual)) {
-            int start = contents.indexOf(vitual) + vitual.length()+1;
+            int start = contents.indexOf(vitual) + vitual.length() + 1;
             int end = contents.indexOf("/", start);
             System.out.println("start:" + start + ",end:" + end);
             final String type = contents.substring(start, end).split(":")[0];

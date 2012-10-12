@@ -17,6 +17,7 @@
         <module>EvaluationApp</module>
         <module>listenerWS</module>
         <module>VirtualEntityManager</module>
+        <module>SparqlManager</module>
     </modules>
 
     <name>Applications</name>
