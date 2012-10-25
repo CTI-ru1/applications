@@ -1,6 +1,7 @@
 package eu.uberdust.sparql.endpoint;
 
 
+import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.sparql.endpoint.servlet.AddRuleFormServlet;
 import eu.uberdust.sparql.endpoint.servlet.AddRuleServlet;
 import eu.uberdust.sparql.endpoint.servlet.ListRulesServlet;
@@ -23,6 +24,8 @@ public class SparqlRuleEndpoint {
     public static void main(String[] args) throws Exception {
 
         PropertyConfigurator.configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
+
+        UberdustClient.getInstance().setUberdustURL("http://uberdust.cti.gr");
 
         RuleManager.getInstance();
 
