@@ -1,4 +1,4 @@
-package eu.uberdust;
+package eu.uberdust.communication.rest;
 
 import org.apache.log4j.Logger;
 
@@ -102,6 +102,7 @@ public class Converter {
                 caps.add(newCap);
             }
         }
+
 
         return caps;
     }

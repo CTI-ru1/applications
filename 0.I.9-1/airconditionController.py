@@ -16,15 +16,16 @@ import message
 import urllib2
 import logging
 import datetime
+import inspect, os
+fname=inspect.getfile(inspect.currentframe()).split('/')[-1].split('.py')[0]
 
-
-logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename='airconditionController.log',level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename=fname+'.log',level=logging.INFO)
 
 #FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 #logging.basicConfig(format=FORMAT)
 #logger = logging.getLogger('0.I.9-1.py')
 
-temperaturenode="urn:wisebed:ctitestbed:0x9979"
+temperaturenode="urn:wisebed:ctitestbed:0x153d"
 temperaturecapability="urn:wisebed:node:capability:temperature"
 actuatornode="urn:wisebed:ctitestbed:0x2b0"
 actuatorPayload="7f,69,70,1,ff,"
@@ -39,7 +40,7 @@ binary1=0
 expectedTemperature=0
 reportedTemperature=0
 
-reportedThr=25
+reportedThr=26
 expectedThr=25
 
 logging.info('Starting application')
@@ -102,12 +103,12 @@ def periodic_check( threadName, delay):
 			logging.info("checking")
 
 		logging.info("expected: "+str(expectedTemperature) + ",reprted: "+str(reportedTemperature))
-		if reportedTemperature > reportedThr :
+		if reportedTemperature >= reportedThr :
                         logging.info("turning on")
                         urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/"+actuatornode+"/payload/"+actuatorPayload+"1")
-		elif expectedTemperature > expectedThr :
-			logging.info("turning on")
-			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/"+actuatornode+"/payload/"+actuatorPayload+"1")
+		elif expectedTemperature <= expectedThr :
+			logging.info("turning off-expected")
+			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/"+actuatornode+"/payload/"+actuatorPayload+"0")
 		else:
 			logging.info("turning off")
 			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/"+actuatornode+"/payload/"+actuatorPayload+"0")

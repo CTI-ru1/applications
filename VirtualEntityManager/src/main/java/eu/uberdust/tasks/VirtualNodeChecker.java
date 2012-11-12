@@ -25,6 +25,8 @@ public class VirtualNodeChecker extends TimerTask {
 
     @Override
     public void run() {
+
+
         String nodes = RestClient.getInstance().callRestfulWebService("http://uberdust.cti.gr/rest/testbed/1/node/raw");
         String[] lines = nodes.split("urn:");
         System.out.println(lines.length);
@@ -58,9 +60,10 @@ public class VirtualNodeChecker extends TimerTask {
                 if (key.contains("workstation")) {
                     String entityName = key.split(",")[0];
                     String node = key.split(",")[1].replaceAll("\\]", "");
-//                    String url = "http://uberdust.cti.gr/rest/testbed/1/link/" + entityName + "/" + node + "/capability/virtual/insert/timestamp/0/reading/0/";
-//                    System.out.println(url);
-//                    String result1 = RestClient.getInstance().callRestfulWebService(url);
+                    String url = "http://uberdust.cti.gr/rest/testbed/1/link/" + entityName + "/" + node + "/capability/virtual/insert/timestamp/0/reading/0/";
+                    System.out.println(url);
+
+                    String result1 = RestClient.getInstance().callRestfulWebService(url);
 
                     System.out.println("SHOULD REMOVE " + key);
                 }

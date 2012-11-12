@@ -32,7 +32,7 @@ public final class LightController {
 
     private boolean flag;
 
-    public static final int MAX_TRIES = 3;
+    public static final int MAX_TRIES = 2;
 
     public static final int WINDOW = 10;
 
@@ -51,9 +51,9 @@ public final class LightController {
      */
     private static LightController ourInstance = null;
 
-    public static final double LUM_THRESHOLD_1 = 350;                       //350
+    public static final double LUM_THRESHOLD_1 = 15000;                       //350
 
-    public static final double LUM_THRESHOLD_2 = 200;                         //200
+    public static final double LUM_THRESHOLD_2 = 10000;                         //200
 
     private double lastLumReading;
 
@@ -107,14 +107,19 @@ public final class LightController {
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
         //Subscription for notifications.
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
-        WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK, MainApp.CAPABILITY_SCREENLOCK);
+
+        //WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_PIR, MainApp.CAPABILITY_PIR);
+        //WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_LIGHT, MainApp.CAPABILITY_LIGHT);
+        //WSReadingsClient.getInstance().subscribe(MainApp.URN_SENSOR_SCREENLOCK, MainApp.CAPABILITY_SCREENLOCK);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_VROOM, MainApp.CAPABILITY_PIR);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_VROOM, MainApp.CAPABILITY_LIGHT);
+        WSReadingsClient.getInstance().subscribe(MainApp.URN_VROOM, MainApp.CAPABILITY_SCREENLOCK);
+
 
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new LastReadingsObserver());
 
-        timer.schedule(new KeepLightsOn(timer), KeepLightsOn.DELAY);
+        //timer.schedule(new KeepLightsOn(timer), KeepLightsOn.DELAY);
 
     }
 
@@ -123,7 +128,7 @@ public final class LightController {
         for(int k=0,j=1; k<=WINDOW-1; k++,j=j+3){
 
             Lum[k] = Double.valueOf(readings.split("\t")[j]);
-            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+           // LOGGER.info("Lum["+k+"]: "+Lum[k]);
 
         }
 
@@ -133,7 +138,7 @@ public final class LightController {
     public void setLastLumReading(final double thatReading) {
         double sum = 0;
 
-        LOGGER.info(" i : "+i);
+        //LOGGER.info(" i : "+i);
 
         if(i == 0) {
             Lum[i] = thatReading;
@@ -144,10 +149,10 @@ public final class LightController {
         }
 
         LOGGER.info("thatReading : "+thatReading);
-        LOGGER.info(" i : "+i);
+       // LOGGER.info(" i : "+i);
 
         for(int k=0; k<=WINDOW-1; k++){
-            LOGGER.info("Lum["+k+"]: "+Lum[k]);
+            //LOGGER.info("Lum["+k+"]: "+Lum[k]);
             sum+=Lum[k];
         }
 
@@ -232,6 +237,7 @@ public final class LightController {
         if (isScreenLocked) {
 
             if (Median < LUM_THRESHOLD_1) {
+                LOGGER.info("TURN LIGHTS OOOOOOOOOOOOOON");
                 //turn on lights
                 turnOnLights();
 
@@ -327,7 +333,7 @@ public final class LightController {
 
         Request request = new Request(CodeRegistry.METHOD_POST, false);
         request.setURI("/lz"+zone);
-        request.setPayload(String.valueOf(value));
+        request.setPayload(value ? "1" : "0");
         request.toByteArray();
         final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x99c/payload/7f,69,70,33");
 

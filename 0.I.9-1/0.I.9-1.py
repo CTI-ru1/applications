@@ -15,8 +15,10 @@ import thread
 import message
 import urllib2
 import logging
+import inspect, os
+fname=inspect.getfile(inspect.currentframe()).split('/')[-1].split('.py')[0]
 
-logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename='0.I.9-1.log',level=logging.INFO)
+logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename=fname+'.log',level=logging.INFO)
 
 #FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 #logging.basicConfig(format=FORMAT)
@@ -31,7 +33,7 @@ PROTOCOL = []
 lasttime = 0
 wsconnection=0
 binary1=0
-
+screenState=True
 
 logging.info('Starting application')
 
@@ -49,6 +51,10 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 	def onMessage(self, wsmessage, binary):
 		global lasttime
 		global binary1		
+	        global screenState
+		if screenState:
+			logging.debug("screen is locked!")
+			#return
 		try :
 			envelope = message.Envelope()
 			envelope.ParseFromString(wsmessage)
@@ -61,12 +67,6 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 				if diff > 20 :
 					logging.info("turning on")
 					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,1")
-					#time.sleep(0.1)
-					#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1")
-					#time.sleep(0.1)
-					#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,2,1")
-					#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/1/")
-					#os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,1 -O /dev/null")
 					#os.system("gntp-send '0.I.9-1' 'turning on'")
 					lasttime=nowtime
 					self.sendMessage(wsmessage, binary)
@@ -76,6 +76,13 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 		logging.info("onClose")
                 #os.system("gntp-send '0.I.9-1' 'onClose'")
 		reconnect()
+def screen_check( threadName, delay):
+        global screenState
+        while 1:
+                screenState=urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:gold/capability/urn:ctinetwork:node:capability:lockScreen/latestreading").read().split()[1]=='1.0'
+                logging.info("screenState:"+str(screenState))
+                time.sleep(delay)
+
 
 def periodic_check( threadName, delay):
 	global lasttime
@@ -90,14 +97,6 @@ def periodic_check( threadName, delay):
 		logging.info("diff is "+str(diff))
 		if diff >  delay:
 			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0")
-			#time.sleep(0.1)
-			#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0")
-			#time.sleep(0.1)
-			#urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,2,0")
-			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light3/insert/timestamp/"+str(nowtime)+"/reading/0/")
-			#urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:0.I.9/capability/light4/insert/timestamp/"+str(nowtime)+"/reading/0/")
-                        #os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0 -O /dev/null")
-			#os.system("wget http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,4,0 -O /dev/null")
 			#os.system("gntp-send '0.I.9-1' 'turning off'")
                         logging.info("turning off after "+str(diff))
 def ping_task( threadName, delay):	
@@ -130,7 +129,8 @@ def main(argv=None):
 
 		try:
 			thread.start_new_thread(periodic_check, ("Thread-1", 60, ))
-			thread.start_new_thread(ping_task, ("Thread-1", 30, ))
+			thread.start_new_thread(screen_check, ("Thread-2", 60, ))
+			thread.start_new_thread(ping_task, ("Thread-3", 30, ))
 		except:
 			logging.error("Error: unable to create new thread")
 

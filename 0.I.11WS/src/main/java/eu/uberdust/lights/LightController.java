@@ -1,6 +1,8 @@
 package eu.uberdust.lights;
 
 import ch.ethz.inf.vs.californium.coap.CodeRegistry;
+import ch.ethz.inf.vs.californium.coap.Option;
+import ch.ethz.inf.vs.californium.coap.OptionNumberRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import eu.uberdust.Converter;
 import eu.uberdust.communication.protobuf.Message;
@@ -74,8 +76,8 @@ public final class LightController implements Observer {
         zone2 = false;
         timer = new Timer();
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
-       // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.11","urn:wisebed:node:capability:pir");
+        // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
+        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.11", "urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().addObserver(this);
     }
 
@@ -111,7 +113,10 @@ public final class LightController implements Observer {
         }
 
         Request request = new Request(CodeRegistry.METHOD_POST, false);
-        request.setURI("/lz"+zone);
+        request.setURI("/lz" + zone);
+        Option uriHostOption = new Option(OptionNumberRegistry.URI_HOST);
+        uriHostOption.setStringValue("494");
+        request.addOption(uriHostOption);
         request.setPayload(value ? "1" : "0");
         request.toByteArray();
         final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,33");
@@ -151,7 +156,9 @@ public final class LightController implements Observer {
 
         Message.NodeReadings readings = (Message.NodeReadings) arg;
         for (Message.NodeReadings.Reading reading : readings.getReadingList()) {
-            LightController.getInstance().setLastReading(reading.getTimestamp());
+            if (reading.hasDoubleReading() && reading.getDoubleReading() > 0) {
+                LightController.getInstance().setLastReading(reading.getTimestamp());
+            }
         }
     }
 }

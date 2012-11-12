@@ -21,7 +21,7 @@ public class KeepLightsOn extends TimerTask {
 
     private final Timer timer;
 
-    public static final long DELAY = 60000;
+    public static final long DELAY = 60000;               //60000
 
     public KeepLightsOn(final Timer thatTimer) {
         super();
@@ -43,7 +43,10 @@ public class KeepLightsOn extends TimerTask {
                 LightController.getInstance().controlLight(true, 2);
                 LightController.getInstance().controlLight(true, 3);
             } else if (LightController.getInstance().getLastLumReading() > LightController.LUM_THRESHOLD_1) {
-                LightController.getInstance().controlLight(false, -1);
+                //LightController.getInstance().controlLight(false, -1);
+                LightController.getInstance().controlLight(false, 1);
+                LightController.getInstance().controlLight(false, 2);
+                LightController.getInstance().controlLight(false, 3);
             }
 
         }

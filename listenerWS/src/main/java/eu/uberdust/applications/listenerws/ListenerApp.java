@@ -39,12 +39,17 @@ public class ListenerApp implements Observer {
     public ListenerApp() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("hello world!");
-        server = "ws://localhost:8081/uberdust/readings.ws";
+        server = "ws://uberdust.cti.gr:80/readings.ws";
         // Call http://carrot.cti.gr:8080/uberdust/rest/testbed/1/node/urn:wisebed:ctitestbed:0x9979/capability/urn:wisebed:node:capability:pir/insert/timestamp/1731231000/reading/1/
         // to add a reading
 
         WSReadingsClient.getInstance().setServerUrl(server);
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x7061", "urn:wisebed:node:capability:pir");
+        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:temperature");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x180", "urn:wisebed:node:capability:light");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x180", "urn:wisebed:node:capability:temperature");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x153d", "urn:wisebed:node:capability:temperature");
 
         LOGGER.info("Starting connection with Server:" + server);
         LOGGER.info("Starting connection with protocol:" + protocol);
