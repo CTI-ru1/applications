@@ -1,17 +1,13 @@
 package eu.uberdust.lights;
 
-import ch.ethz.inf.vs.californium.coap.CodeRegistry;
-import ch.ethz.inf.vs.californium.coap.Option;
-import ch.ethz.inf.vs.californium.coap.OptionNumberRegistry;
-import ch.ethz.inf.vs.californium.coap.Request;
-import eu.uberdust.Converter;
+import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.communication.protobuf.Message;
-import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import eu.uberdust.lights.tasks.LightTask;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
@@ -112,23 +108,11 @@ public final class LightController implements Observer {
             zone2 = value;
         }
 
-        Request request = new Request(CodeRegistry.METHOD_POST, false);
-        request.setURI("/lz" + zone);
-        Option uriHostOption = new Option(OptionNumberRegistry.URI_HOST);
-        uriHostOption.setStringValue("494");
-        request.addOption(uriHostOption);
-        request.setPayload(value ? "1" : "0");
-        request.toByteArray();
-        final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x494/payload/7f,69,70,33");
-
-        int[] bytes = Converter.getInstance().ByteToInt(request.toByteArray());
-        for (int aByte : bytes) {
-            linkBuilder.append(",").append(Integer.toHexString(aByte));
+        try {
+            UberdustClient.getInstance().sendCoapPost("494", "lz" + zone, value ? "1" : "0");
+        } catch (IOException e) {
+            LOGGER.error(e, e);
         }
-
-        LOGGER.info(linkBuilder.toString());
-        RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
-        RestClient.getInstance().callRestfulWebService(linkBuilder.toString());
 
     }
 
