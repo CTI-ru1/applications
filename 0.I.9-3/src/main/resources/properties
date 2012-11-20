@@ -1,0 +1,4 @@
+server=ws://uberdust.cti.gr:80/readings.ws
+workstation=0.I.9-3
+actuator=4ec
+zone=/lz4
