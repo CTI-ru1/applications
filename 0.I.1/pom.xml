@@ -61,6 +61,13 @@
             <artifactId>WebSocketsLibrary</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>Californium</groupId>
+            <artifactId>Coap</artifactId>
+            <version>1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../lib/ExampleClient.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
