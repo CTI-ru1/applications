@@ -2,6 +2,7 @@ package eu.uberdust.applications.listenerws;
 
 import eu.uberdust.communication.protobuf.Message;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
+import eu.uberdust.util.PropertyReader;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -42,7 +43,8 @@ public class ListenerApp implements Observer {
 
     public ListenerApp() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
-        Properties prop = new Properties();
+        PropertyReader.getInstance().setFile("properties");
+        Properties prop = PropertyReader.getInstance().getProperties();
         try {
             prop.load(this.getClass().getClassLoader().getResourceAsStream("properties"));
         } catch (IOException e) {
@@ -81,7 +83,7 @@ public class ListenerApp implements Observer {
             try {
                 ActionManager.getInstance().makeAction(
                         //LockManager.getInstance().isLocked() &&
-                                PresenseManager.getInstance().isEmpty()
+                        PresenseManager.getInstance().isEmpty()
                 );
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

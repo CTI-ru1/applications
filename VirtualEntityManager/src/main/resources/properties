@@ -1,0 +1,3 @@
+uberdustURL=http://uberdust.cti.gr/
+virtual.capabilities=workstation,room
+testbed.prefix=urn:wisebed:ctitestbed:

@@ -1,8 +1,9 @@
-package eu.uberdust;
+package eu.uberdust.virtualnodemanager;
 
 
 import eu.uberdust.communication.UberdustClient;
-import eu.uberdust.tasks.VirtualNodeChecker;
+import eu.uberdust.util.PropertyReader;
+import eu.uberdust.virtualnodemanager.tasks.VirtualNodeChecker;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -10,20 +11,16 @@ import java.util.Timer;
 
 /**
  * Created by IntelliJ IDEA.
- * User: akribopo
- * Date: 10/7/11
- * Time: 2:36 PM
- * To change this template use File | Settings | File Templates.
+ * User: amaxilatis
  */
 public final class VirtualNodeManager {
-
     /**
      * Static Logger.
      */
     private static final Logger LOGGER = Logger.getLogger(VirtualNodeManager.class);
 
     /**
-     * Pir timer.
+     * Execution Timer.
      */
     private final Timer timer;
 
@@ -34,8 +31,8 @@ public final class VirtualNodeManager {
 
 
     /**
-     * LightController is loaded on the first execution of LightController.getInstance()
-     * or the first access to LightController.ourInstance, not before.
+     * VirtualNodeManager is loaded on the first execution of VirtualNodeManager.getInstance()
+     * or the first access to VirtualNodeManager.ourInstance, not before.
      *
      * @return ourInstance
      */
@@ -52,14 +49,20 @@ public final class VirtualNodeManager {
      * Private constructor suppresses generation of a (public) default constructor.
      */
     private VirtualNodeManager() {
-        PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
+        PropertyConfigurator.configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
+        PropertyReader.getInstance().setFile("properties");
 
-        UberdustClient.getInstance().setUberdustURL("http://uberdust.cti.gr/");
+        UberdustClient.getInstance().setUberdustURL((String) PropertyReader.getInstance().getProperties().get("uberdustURL"));
         LOGGER.info("Virtual Node Checker initialized");
         timer = new Timer();
         timer.scheduleAtFixedRate(new VirtualNodeChecker(), 1000, 60000);
     }
 
+    /**
+     * Start the Virtual Node Managet Application.
+     *
+     * @param args unused
+     */
     public static void main(final String[] args) {
         VirtualNodeManager.getInstance();
     }

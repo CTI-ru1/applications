@@ -87,6 +87,12 @@
             <artifactId>UberdustInterface</artifactId>
             <version>1.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>uberdust</groupId>
+            <artifactId>PropertyReader</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

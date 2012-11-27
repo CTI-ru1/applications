@@ -54,7 +54,11 @@
             <artifactId>UberdustInterface</artifactId>
             <version>1.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>uberdust</groupId>
+            <artifactId>PropertyReader</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,7 +76,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <mainClass>eu.uberdust.MainApp</mainClass>
+                            <mainClass>eu.uberdust.virtualnodemanager.VirtualNodeManager</mainClass>
                         </configuration>
                         <goals>
                             <goal>one-jar</goal>
