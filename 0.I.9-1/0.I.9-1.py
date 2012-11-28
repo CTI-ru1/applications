@@ -8,7 +8,9 @@ Uberdust server on http://uberdust.cti.gr.
 import sys
 import getopt
 from twisted.internet import reactor
-from autobahn.websocket import connectWS,WebSocketClientFactory, WebSocketClientProtocol
+from autobahn.websocket import WebSocketClientFactory, \
+                               WebSocketClientProtocol, \
+                               connectWS
 import os
 import time
 import thread
@@ -24,8 +26,8 @@ logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',filename=f
 #logging.basicConfig(format=FORMAT)
 #logger = logging.getLogger('0.I.9-1.py')
 
-node="urn:wisebed:ctitestbed:0x9979"
-capability="urn:wisebed:node:capability:pir"
+node="urn:wisebed:ctitestbed:gold"
+capability="urn:wisebed:ctitestbed:node:capability:pir"
 URL = '://uberdust.cti.gr:80/readings.ws'
 WS_URL = 'ws'+URL
 http_URL = 'http'+URL
@@ -42,68 +44,23 @@ class NodeCapabilityConsumerProtocol(WebSocketClientProtocol):
 	Node/Capability consumer protocol class.
 	"""
 
-	def onOpen(self):
-                #os.system("gntp-send '0.I.9-1' 'onOpen'")
+	def onOpen(self):		
 		global wsconnection
 		wsconnection=self
 		# on connection establish
-		logging.info('WebSocket Connection to '+str(WS_URL)+' established.')
-	def onMessage(self, wsmessage, binary):
-		global lasttime
-		global binary1		
-	        global screenState
-		if screenState:
-			logging.debug("screen is locked!")
-			#return
-		try :
-			envelope = message.Envelope()
-			envelope.ParseFromString(wsmessage)
-			if envelope.type==1:
-				logging.info(str(envelope.nodeReadings.reading[0].timestamp)+" "+str(envelope.nodeReadings.reading[0].node))
-				binary1=binary
-				# on received message
-				nowtime=envelope.nodeReadings.reading[0].timestamp/1000
-				diff=nowtime-lasttime
-				if diff > 20 :
-					logging.info("turning on")
-					urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,1")
-					#os.system("gntp-send '0.I.9-1' 'turning on'")
-					lasttime=nowtime
-					self.sendMessage(wsmessage, binary)
-		except :
-			logging.debug("error in onMessage")
+		logging.info('WebSocket Connection to '+str(WS_URL)+' established.')	
+	def onMessage(self, wsmessage, binary):		
+		logging.debug("screen is locked!")		
 	def onClose(self,wasClean, code, reason):
 		logging.info("onClose")
-                #os.system("gntp-send '0.I.9-1' 'onClose'")
-		reconnect()
-def screen_check( threadName, delay):
-        global screenState
-        while 1:
-                screenState=urllib2.urlopen("http://uberdust.cti.gr/rest/testbed/3/node/urn:ctinetwork:gold/capability/urn:ctinetwork:node:capability:lockScreen/latestreading").read().split()[1]=='1.0'
-                logging.info("screenState:"+str(screenState))
-                time.sleep(delay)
+		#reconnect()
 
-
-def periodic_check( threadName, delay):
-	global lasttime
-	global wsconnection
-	while 1:
-		time.sleep(delay)
-                # on received message
-                nowtime=time.time()
-                diff=nowtime-lasttime
-		logging.info("sending ping")
-		wsconnection.sendMessage("ping",binary1)
-		logging.info("diff is "+str(diff))
-		if diff >  delay:
-			urllib2.urlopen("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x4ec/payload/7f,69,70,1,3,0")
-			#os.system("gntp-send '0.I.9-1' 'turning off'")
-                        logging.info("turning off after "+str(diff))
 def ping_task( threadName, delay):	
 	global wsconnection
 	while 1:
 		time.sleep(delay)
 		wsconnection.sendMessage("ping",binary1)	
+
 def main(argv=None):
 	global lasttime
 	lasttime=time.time()
@@ -127,12 +84,12 @@ def main(argv=None):
 				capability = v
 
 
-		try:
-			thread.start_new_thread(periodic_check, ("Thread-1", 60, ))
-			thread.start_new_thread(screen_check, ("Thread-2", 60, ))
-			thread.start_new_thread(ping_task, ("Thread-3", 30, ))
-		except:
-			logging.error("Error: unable to create new thread")
+		#try:
+		#thread.start_new_thread(periodic_check, ("Thread-1", 60, ))
+		#thread.start_new_thread(screen_check, ("Thread-2", 60, ))
+		#thread.start_new_thread(ping_task, ("Thread-3", 30, ))
+		#except:
+		#	logging.error("Error: unable to create new thread")
 
 		# initialize WebSocketClientFactory object and make connection
 		reconnect()

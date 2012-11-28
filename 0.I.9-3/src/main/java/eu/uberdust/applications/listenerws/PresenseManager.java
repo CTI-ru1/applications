@@ -17,11 +17,11 @@ public class PresenseManager {
      * Static Logger.
      */
     private static final Logger LOGGER = Logger.getLogger(PresenseManager.class);
-    private Map<String, Double> states;
+    private Map<String, Long> states;
     private static PresenseManager instance = null;
 
     public PresenseManager() {
-        this.states = new HashMap<String, Double>();
+        this.states = new HashMap<String, Long>();
     }
 
     public static PresenseManager getInstance() {
@@ -35,13 +35,18 @@ public class PresenseManager {
 
     public void addReading(Message.NodeReadings.Reading reading) {
         if ("urn:wisebed:node:capability:pir".equals(reading.getCapability())) {
-            states.put(reading.getNode(), reading.getDoubleReading());
+            if (reading.getDoubleReading() > 0) {
+                states.put(reading.getNode(), reading.getTimestamp());
+            }
         }
     }
 
     public boolean isEmpty() {
+        for (String point : states.keySet()) {
+            LOGGER.info(states.get(point) + "@" + states.get(point));
+        }
         for (String host : states.keySet()) {
-            if (states.get(host) == 1) {
+            if ((System.currentTimeMillis() - states.get(host)) < 60000) {
                 return false;
             }
         }

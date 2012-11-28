@@ -13,7 +13,6 @@
         <module>0.I.1</module>
         <module>0.I.2</module>
         <module>0.I.3</module>
-        <module>0.I.9</module>
         <module>0.I.9-3</module>
         <module>TraceParser</module>
         <module>EvaluationApp</module>
@@ -113,13 +112,6 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
             <version>2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>Californium</groupId>
-            <artifactId>Coap</artifactId>
-            <version>1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/ExampleClient.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
