@@ -40,6 +40,9 @@ public class PresenseManager {
     }
 
     public boolean isEmpty() {
+        for (String point : states.keySet()) {
+            LOGGER.info(states.get(point));
+        }
         for (String host : states.keySet()) {
             if (states.get(host) == 1) {
                 return false;

@@ -61,7 +61,7 @@ public class ListenerApp implements Observer {
         ActionManager.getInstance().setActuator(actuator, zone);
 
         WSReadingsClient.getInstance().setServerUrl(server);
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:workstation:" + workstation, "urn:wisebed:ctitestbed:node:capability:lockScreen");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:workstation:" + workstation, "urn:wisebed:ctitestbed:node:capability:lockScreen");
         WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:workstation:" + workstation, "urn:wisebed:node:capability:pir");
 //        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:odyssey", "urn:wisebed:ctitestbed:node:capability:lockScreen");
         LOGGER.info("Starting connection with Server:" + server);
@@ -78,7 +78,7 @@ public class ListenerApp implements Observer {
         LOGGER.info("observed reading");
         if (arg instanceof Message.NodeReadings) {
             Message.NodeReadings reading = (Message.NodeReadings) arg;
-            LockManager.getInstance().addReading(reading.getReading(0));
+//            LockManager.getInstance().addReading(reading.getReading(0));
             PresenseManager.getInstance().addReading(reading.getReading(0));
             try {
                 ActionManager.getInstance().makeAction(
