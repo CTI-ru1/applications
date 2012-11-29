@@ -7,7 +7,6 @@ import eu.uberdust.lights.tasks.LightTask;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
@@ -108,11 +107,7 @@ public final class LightController implements Observer {
             zone2 = value;
         }
 
-        try {
-            UberdustClient.getInstance().sendCoapPost("494", "lz" + zone, value ? "1" : "0");
-        } catch (IOException e) {
-            LOGGER.error(e, e);
-        }
+        UberdustClient.getInstance().sendCoapPost("494", "lz" + zone, value ? "1" : "0");
 
     }
 

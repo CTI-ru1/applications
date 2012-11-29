@@ -63,6 +63,7 @@ public class ListenerApp implements Observer {
         WSReadingsClient.getInstance().setServerUrl(server);
 //        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:workstation:" + workstation, "urn:wisebed:ctitestbed:node:capability:lockScreen");
         WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:workstation:" + workstation, "urn:wisebed:node:capability:pir");
+//        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x9979", "urn:wisebed:node:capability:pir");
 //        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:odyssey", "urn:wisebed:ctitestbed:node:capability:lockScreen");
         LOGGER.info("Starting connection with Server:" + server);
 
@@ -81,6 +82,7 @@ public class ListenerApp implements Observer {
 //            LockManager.getInstance().addReading(reading.getReading(0));
             PresenseManager.getInstance().addReading(reading.getReading(0));
             try {
+                LOGGER.info("isEmpty:" + PresenseManager.getInstance().isEmpty());
                 ActionManager.getInstance().makeAction(
                         //LockManager.getInstance().isLocked() &&
                         PresenseManager.getInstance().isEmpty()
