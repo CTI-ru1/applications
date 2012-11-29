@@ -65,19 +65,29 @@ public class GetJson {
             LOGGER.info(inputLine.toString());
             String the_json = inputLine.toString();
 
-            JSONArray json = new JSONArray(the_json);
+            String val = null;
+            if (the_json.startsWith("[")) {
+                JSONArray json = new JSONArray(the_json);
 
-            String parse1 = json.getString(0);
+                String parse1 = json.getString(0);
 
-            JSONObject json2 = new JSONObject(parse1);
+                JSONObject json2 = new JSONObject(parse1);
 
-            String val = json2.getString(pref);
+                val = json2.getString(pref);
+            }  else if (the_json.startsWith("{")){
+
+                JSONObject json2 = new JSONObject(the_json);
+
+                val = json2.getString(pref);
+            }
+
+            //LOGGER.info(val);
 
             return val;
 
             // return inputLine.toString();
         } catch (final Exception e) {
-            // LOGGER.error(e);
+            LOGGER.error(e);
             if (e.getMessage().contains("406")) {
                 return "0\t0";
             }

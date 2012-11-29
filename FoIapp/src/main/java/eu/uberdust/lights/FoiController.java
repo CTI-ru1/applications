@@ -37,6 +37,11 @@ public final class FoiController {
 
     public static final String USER_PREFERENCES ="http://150.140.16.31/api/v1/foi?identifier="+MainApp.FOI;
 
+    public static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:workstation:"+MainApp.FOI+"/capabilities/json";
+
+    public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:workstation:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONE+"/json/limit/1";
+
+    public static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL,"nodeId").split("0x")[1];
 
     /**
      * Pir timer.
@@ -198,12 +203,7 @@ public final class FoiController {
 
         Zone = value;
 
-            try {
-                UberdustClient.getInstance().sendCoapPost("4ec", "lz" + zone, value ? "1" : "0");
-            } catch (IOException e) {
-                LOGGER.error(e, e);
-            }
-
+        UberdustClient.getInstance().sendCoapPost(FOI_ACTUATOR, "lz" + zone, value ? "1" : "0");
       }
     }
 
