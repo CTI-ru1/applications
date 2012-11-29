@@ -42,9 +42,9 @@ public class PresenseManager {
     }
 
     public boolean isEmpty() {
-        for (String point : states.keySet()) {
-            LOGGER.info(states.get(point) + "@" + states.get(point));
-        }
+//        for (String point : states.keySet()) {
+//            LOGGER.info(states.get(point) + "@" + states.get(point));
+//        }
         for (String host : states.keySet()) {
             if ((System.currentTimeMillis() - states.get(host)) < 60000) {
                 return false;
