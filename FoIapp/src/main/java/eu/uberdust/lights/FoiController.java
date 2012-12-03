@@ -4,6 +4,7 @@ import eu.uberdust.MainApp;
 import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
+import eu.uberdust.lights.tasks.LightTask;
 import eu.uberdust.lights.tasks.TurnOffTask_2;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -23,6 +24,16 @@ public final class FoiController {
 
     private boolean Zone;
 
+    private boolean zone1;
+
+    private boolean zone2;
+
+    private long lastPirReading;
+
+    private long zone1TurnedOnTimestamp;
+
+    private long zone2TurnedOnTimestamp;
+
     private boolean isScreenLocked;
 
     public static final int WINDOW = 10;
@@ -31,15 +42,15 @@ public final class FoiController {
 
     private static int i = WINDOW-1;
 
-    public static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:workstation:"+MainApp.FOI;
+    public static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:"+MainApp.FOI;
 
-    public static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:workstation:"+MainApp.FOI+"/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+    public static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
     public static final String USER_PREFERENCES ="http://150.140.16.31/api/v1/foi?identifier="+MainApp.FOI;
 
-    public static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:workstation:"+MainApp.FOI+"/capabilities/json";
+    public static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capabilities/json";
 
-    public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:workstation:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONE+"/json/limit/1";
+    public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONE+"/json/limit/1";
 
     public static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL,"nodeId").split("0x")[1];
 
@@ -81,13 +92,8 @@ public final class FoiController {
      */
     private FoiController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
-        LOGGER.info("Light Controller initialized");
+        LOGGER.info("FOI Controller initialized");
         timer = new Timer();
-
-        setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
-        //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
-        setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
-
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isScreenLocked -- " + isScreenLocked);
@@ -96,13 +102,25 @@ public final class FoiController {
 
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
+        LOGGER.info(MainApp.FOI.split(":")[0]);
+
         //Subscription for notifications.
-        //WSReadingsClient.getInstance().subscribe(MainApp.URN_FOI, MainApp.CAPABILITY_LIGHT);
-        WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.2", MainApp.CAPABILITY_LIGHT);
+        if(MainApp.FOI.split(":")[0].equals("workstation")){
+
+            setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
+            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
+
+            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
+            WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.2", MainApp.CAPABILITY_LIGHT);
+
+        }
+        else if(MainApp.FOI.split(":")[0].equals("room")){
+
+            //setScreenLocked(false);
+            WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.1", MainApp.CAPABILITY_PIR);               //this.URN_FOI
+        }
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new ReadingsObserver());
-
 
     }
 
@@ -178,6 +196,29 @@ public final class FoiController {
 
     }
 
+    public long getLastPirReading() {
+        return lastPirReading;
+    }
+
+    public void setLastPirReading(final long thatReading) {
+        this.lastPirReading = thatReading;
+        if (!zone1) {
+            controlLight(true, 3);
+            zone1TurnedOnTimestamp = thatReading;
+            timer.schedule(new LightTask(timer), LightTask.DELAY);
+        } else if (!zone2) {
+            controlLight(true, 3);
+            if (thatReading - zone1TurnedOnTimestamp > 15000) {
+                controlLight(true, 2);
+                controlLight(true, 1);
+                zone2TurnedOnTimestamp = thatReading;
+            }
+        } else {
+            controlLight(true, 2);
+            controlLight(true, 1);
+        }
+    }
+
     public double getLastLumReading() {
         return this.lastLumReading;
     }
@@ -195,15 +236,29 @@ public final class FoiController {
         return Zone;
     }
 
+    public boolean isZone1() {
+        return zone1;
+    }
+
+    public boolean isZone2() {
+        return zone2;
+    }
+
     public synchronized void controlLight(final boolean value, final int zone) {
 
         BYPASS = Boolean.parseBoolean(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"bypass"));
 
         if (!BYPASS){
 
-        Zone = value;
+            if (zone == 3) {
+                zone1 = value;
+            } else if (zone == 1) {
+                zone2 = value;
+            }
 
-        UberdustClient.getInstance().sendCoapPost(FOI_ACTUATOR, "lz" + zone, value ? "1" : "0");
+            //Zone = value;
+
+            UberdustClient.getInstance().sendCoapPost(FOI_ACTUATOR, "lz" + zone, value ? "1" : "0"); //FOI_ACTUATOR
       }
     }
 

@@ -73,7 +73,7 @@ public final class LightController implements Observer {
         timer = new Timer();
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
         // WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:0x1ccd", "urn:wisebed:node:capability:pir");
-        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.11", "urn:wisebed:node:capability:pir");
+        WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.2", "urn:wisebed:node:capability:pir");
         WSReadingsClient.getInstance().addObserver(this);
     }
 
@@ -108,12 +108,7 @@ public final class LightController implements Observer {
             zone2 = value;
         }
 
-        try {
-            UberdustClient.getInstance().sendCoapPost("494", "lz" + zone, value ? "1" : "0");
-        } catch (IOException e) {
-            LOGGER.error(e, e);
-        }
-
+        UberdustClient.getInstance().sendCoapPost("2df", "lz" + zone, value ? "1" : "0");
     }
 
     public boolean isZone1() {

@@ -62,9 +62,10 @@ public class ReadingsObserver implements Observer {
                 final Double value = reading.getDoubleReading();
                 LOGGER.info("Lum: " + value);
 
-                FoiController.getInstance().setLastLumReading(value);
+                if(MainApp.FOI.split(":")[0].equals("workstation")){
+                    FoiController.getInstance().setLastLumReading(value);   }
 
-            } /*else if (reading.getCapability().equals(MainApp.CAPABILITY_PIR)) {
+            } else if (reading.getCapability().equals(MainApp.CAPABILITY_PIR)) {
 
                 final Double value = reading.getDoubleReading();
 
@@ -77,7 +78,7 @@ public class ReadingsObserver implements Observer {
 
                 }
 
-            }*/
+            }
         }
     }
 }
