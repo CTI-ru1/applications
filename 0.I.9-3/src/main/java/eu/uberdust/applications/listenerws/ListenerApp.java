@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by IntelliJ IDEA.
@@ -69,6 +71,13 @@ public class ListenerApp implements Observer {
 
 
         WSReadingsClient.getInstance().addObserver(this);
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                validateState();
+            }
+        }, 10000, 60000);
     }
 
     @Override
@@ -90,6 +99,19 @@ public class ListenerApp implements Observer {
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
+        }
+    }
+
+
+    public void validateState() {
+        try {
+            LOGGER.info("isEmpty:" + PresenseManager.getInstance().isEmpty());
+            ActionManager.getInstance().makeAction(
+                    //LockManager.getInstance().isLocked() &&
+                    PresenseManager.getInstance().isEmpty()
+            );
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 }
