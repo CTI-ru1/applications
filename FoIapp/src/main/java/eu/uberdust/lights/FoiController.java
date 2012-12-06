@@ -50,7 +50,7 @@ public final class FoiController {
 
     public static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capabilities/json";
 
-    public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONE+"/json/limit/1";
+    public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONES[0]+"/json/limit/1";
 
     public static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL,"nodeId").split("0x")[1];
 
@@ -99,6 +99,8 @@ public final class FoiController {
         LOGGER.info("isScreenLocked -- " + isScreenLocked);
 
         Zone = false;
+        zone1 = false;
+        zone2 = false;
 
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
@@ -117,7 +119,7 @@ public final class FoiController {
         else if(MainApp.FOI.split(":")[0].equals("room")){
 
             //setScreenLocked(false);
-            WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.1", MainApp.CAPABILITY_PIR);               //this.URN_FOI
+            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
         }
         //Adding Observer for the last readings
         WSReadingsClient.getInstance().addObserver(new ReadingsObserver());
@@ -167,11 +169,11 @@ public final class FoiController {
 
         if (Median < LUM_THRESHOLD_1) {
             if (!isScreenLocked) {
-                controlLight(true, Integer.parseInt(MainApp.ZONE));
+                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
             }
 
         } else {
-            controlLight(false, Integer.parseInt(MainApp.ZONE));
+            controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
         }
     }
 
@@ -187,7 +189,7 @@ public final class FoiController {
 
         if (!isScreenLocked) {
             if (Median < LUM_THRESHOLD_1 ) {
-                controlLight(true, Integer.parseInt(MainApp.ZONE));
+                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
             }
         } else if (isScreenLocked) {
             timer.schedule(new TurnOffTask_2(timer), TurnOffTask_2.DELAY);
@@ -203,19 +205,19 @@ public final class FoiController {
     public void setLastPirReading(final long thatReading) {
         this.lastPirReading = thatReading;
         if (!zone1) {
-            controlLight(true, 3);
+            controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
             zone1TurnedOnTimestamp = thatReading;
             timer.schedule(new LightTask(timer), LightTask.DELAY);
-        } else if (!zone2) {
-            controlLight(true, 3);
+        } else if (!zone2 && (MainApp.ZONES.length > 1) ) {
+            controlLight(true, Integer.parseInt(MainApp.ZONES[0]));          //3
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
-                controlLight(true, 2);
-                controlLight(true, 1);
+                controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+                controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
                 zone2TurnedOnTimestamp = thatReading;
             }
         } else {
-            controlLight(true, 2);
-            controlLight(true, 1);
+            controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+            controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
         }
     }
 
@@ -249,11 +251,12 @@ public final class FoiController {
         BYPASS = Boolean.parseBoolean(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"bypass"));
 
         if (!BYPASS){
-
-            if (zone == 3) {
-                zone1 = value;
-            } else if (zone == 1) {
-                zone2 = value;
+            if (zone == Integer.parseInt(MainApp.ZONES[0])) {
+                        zone1 = value;
+              } else if(MainApp.ZONES.length > 1){
+                if (zone == Integer.parseInt(MainApp.ZONES[1]) || zone == Integer.parseInt(MainApp.ZONES[2])) {
+                        zone2 = value;
+                    }
             }
 
             //Zone = value;

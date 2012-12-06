@@ -8,7 +8,7 @@ import eu.uberdust.lights.FoiController;
 public class MainApp {
 
     public static String FOI;
-    public static String ZONE;
+    public static String[] ZONES;
     public static final String CAPABILITY_LIGHT = "urn:wisebed:node:capability:light";
     public static final String CAPABILITY_PIR = "urn:wisebed:node:capability:pir";
     public static final String CAPABILITY_SCREENLOCK = "urn:wisebed:ctitestbed:node:capability:lockScreen";
@@ -17,7 +17,8 @@ public class MainApp {
     public static void main(final String[] args) {
 
         FOI = args[0];
-        ZONE = args[1];
+        ZONES = new String[args.length - 1];
+        System.arraycopy(args, 1, ZONES, 0, args.length - 1);
         FoiController.getInstance();
     }
 }
