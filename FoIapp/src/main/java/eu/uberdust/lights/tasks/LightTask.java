@@ -37,8 +37,9 @@ public class LightTask extends TimerTask {
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > DELAY) {
                 //turn off zone 2
                 LOGGER.info("Turn off zone 2");
-                FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));
                 FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
+                if(MainApp.ZONES.length > 2)
+                   { FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));}
 
                 //Re-schedule this timer to run in 30000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY);

@@ -212,12 +212,14 @@ public final class FoiController {
             controlLight(true, Integer.parseInt(MainApp.ZONES[0]));          //3
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
                 controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
-                controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
+                if(MainApp.ZONES.length > 2)
+                { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
                 zone2TurnedOnTimestamp = thatReading;
             }
-        } else {
+        } else if(MainApp.ZONES.length > 1) {
             controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
-            controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
+            if(MainApp.ZONES.length > 2)
+              { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
         }
     }
 
