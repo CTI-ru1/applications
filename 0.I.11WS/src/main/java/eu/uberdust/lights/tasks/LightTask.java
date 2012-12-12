@@ -36,8 +36,7 @@ public class LightTask extends TimerTask {
             if (System.currentTimeMillis() - LightController.getInstance().getLastReading() > DELAY) {
                 //turn off zone 2
                 LOGGER.info("Turn off zone 2");
-                LightController.getInstance().controlLight(false, 2);
-                LightController.getInstance().controlLight(false, 1);
+                LightController.getInstance().controlLight(false, 3);
 
                 //Re-schedule this timer to run in 30000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY);
@@ -48,7 +47,8 @@ public class LightTask extends TimerTask {
         } else if (LightController.getInstance().isZone1()) {
             if (System.currentTimeMillis() - LightController.getInstance().getLastReading() > 30000) {
                 //turn off zone 1
-                LightController.getInstance().controlLight(false, 3);
+                LightController.getInstance().controlLight(false, 2);
+                LightController.getInstance().controlLight(false, 1);
                 LOGGER.info("Turn off zone 1");
             } else {
                 //Re-schedule this timer to run in 5000ms to turn off

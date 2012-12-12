@@ -83,19 +83,19 @@ public final class LightController implements Observer {
     public void setLastReading(final long thatReading) {
         this.lastReading = thatReading;
         if (!zone1) {
-            controlLight(true, 3);
+            controlLight(true, 2);
+            controlLight(true, 1);
             zone1TurnedOnTimestamp = thatReading;
             timer.schedule(new LightTask(timer), LightTask.DELAY);
         } else if (!zone2) {
-            controlLight(true, 3);
+            controlLight(true, 2);
+            controlLight(true, 1);
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
-                controlLight(true, 2);
-                controlLight(true, 1);
+                controlLight(true, 3);
                 zone2TurnedOnTimestamp = thatReading;
             }
         } else {
-            controlLight(true, 2);
-            controlLight(true, 1);
+            controlLight(true, 3);
         }
     }
 
