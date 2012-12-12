@@ -101,9 +101,9 @@ public final class LightController implements Observer {
 
 
     public void controlLight(final boolean value, final int zone) {
-        if (zone == 3) {
+        if (zone == 1) {
             zone1 = value;
-        } else if (zone == 1) {
+        } else if (zone == 3) {
             zone2 = value;
         }
 
