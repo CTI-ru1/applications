@@ -113,7 +113,7 @@ public final class FoiController {
             setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
 
             WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
-            WSReadingsClient.getInstance().subscribe("urn:wisebed:ctitestbed:virtual:room:0.I.2", MainApp.CAPABILITY_LIGHT);
+            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
 
         }
         else if(MainApp.FOI.split(":")[0].equals("room")){
@@ -168,12 +168,17 @@ public final class FoiController {
         this.lastLumReading = thatReading;
 
         if (Median < LUM_THRESHOLD_1) {
+
             if (!isScreenLocked) {
-                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
+              for(String z : MainApp.ZONES)
+                controlLight(true, Integer.parseInt(z));
+                //controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
             }
 
         } else {
-            controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
+            for(String z : MainApp.ZONES)
+                controlLight(true, Integer.parseInt(z));
+            //controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
         }
     }
 
@@ -189,11 +194,21 @@ public final class FoiController {
 
         if (!isScreenLocked) {
             if (Median < LUM_THRESHOLD_1 ) {
-                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
+
+                for(String z : MainApp.ZONES)
+                    controlLight(true, Integer.parseInt(z));
+
+                //controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
             }
         } else if (isScreenLocked) {
+
             timer.schedule(new TurnOffTask_2(timer), TurnOffTask_2.DELAY);
-            //controlLight(false, Integer.parseInt(MainApp.ZONE));
+
+            String[] temp = new String[MainApp.ZONES.length - 1];
+            System.arraycopy(MainApp.ZONES, 1, temp, 0, MainApp.ZONES.length - 1);
+
+            for(String z : temp)   {
+                controlLight(false, Integer.parseInt(z));}
         }
 
     }
@@ -203,23 +218,35 @@ public final class FoiController {
     }
 
     public void setLastPirReading(final long thatReading) {
+
         this.lastPirReading = thatReading;
+
         if (!zone1) {
+
             controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
             zone1TurnedOnTimestamp = thatReading;
             timer.schedule(new LightTask(timer), LightTask.DELAY);
+
         } else if (!zone2 && (MainApp.ZONES.length > 1) ) {
+
             controlLight(true, Integer.parseInt(MainApp.ZONES[0]));          //3
+
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
+
                 controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+
                 if(MainApp.ZONES.length > 2)
                 { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
+
                 zone2TurnedOnTimestamp = thatReading;
             }
         } else if(MainApp.ZONES.length > 1) {
+
             controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+
             if(MainApp.ZONES.length > 2)
               { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
+
         }
     }
 

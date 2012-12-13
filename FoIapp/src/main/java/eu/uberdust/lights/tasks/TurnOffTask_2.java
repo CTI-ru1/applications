@@ -47,8 +47,8 @@ public class TurnOffTask_2 extends TimerTask {
         isScreenLocked = FoiController.getInstance().isScreenLocked();
 
         if (isScreenLocked) {
-            LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked);
-            FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
+                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked);
+                FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
         }
 
     }
