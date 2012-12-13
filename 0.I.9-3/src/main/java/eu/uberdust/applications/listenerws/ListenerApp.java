@@ -1,5 +1,6 @@
 package eu.uberdust.applications.listenerws;
 
+import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.communication.protobuf.Message;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import eu.uberdust.util.PropertyReader;
@@ -59,6 +60,8 @@ public class ListenerApp implements Observer {
         actuator = (String) prop.get("actuator");
         zone = (String) prop.get("zone");
         LOGGER.info(server);
+
+        UberdustClient.setUberdustURL("http://uberdust.cti.gr");
 
         ActionManager.getInstance().setActuator(actuator, zone);
 
