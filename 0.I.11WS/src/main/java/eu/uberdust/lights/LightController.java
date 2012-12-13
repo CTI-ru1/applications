@@ -67,6 +67,7 @@ public final class LightController implements Observer {
     private LightController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("Light Controller initialized");
+        UberdustClient.setUberdustURL("http://uberdust.cti.gr");
         zone1 = false;
         zone2 = false;
         timer = new Timer();
