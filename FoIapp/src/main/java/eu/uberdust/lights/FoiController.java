@@ -6,6 +6,8 @@ import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import eu.uberdust.lights.tasks.LightTask;
 import eu.uberdust.lights.tasks.TurnOffTask_2;
+import eu.uberdust.lights.tasks.TurnOffTask_3;
+import eu.uberdust.lights.tasks.TurnOffTask_4;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -36,6 +38,8 @@ public final class FoiController {
 
     private boolean isScreenLocked;
 
+    private boolean flag;
+
     public static final int WINDOW = 10;
 
     public static double[] Lum = new double[WINDOW];
@@ -53,6 +57,8 @@ public final class FoiController {
     public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONES[0]+"/json/limit/1";
 
     public static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL,"nodeId").split("0x")[1];
+
+    private long firstCall = 0;
 
     /**
      * Pir timer.
@@ -92,6 +98,7 @@ public final class FoiController {
      */
     private FoiController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
+        UberdustClient.setUberdustURL("http://uberdust.cti.gr");
         LOGGER.info("FOI Controller initialized");
         timer = new Timer();
 
@@ -107,7 +114,7 @@ public final class FoiController {
         LOGGER.info(MainApp.FOI.split(":")[0]);
 
         //Subscription for notifications.
-        if(MainApp.FOI.split(":")[0].equals("workstation")){
+        if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("workstation")){
 
             setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
             setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
@@ -116,7 +123,7 @@ public final class FoiController {
             WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
 
         }
-        else if(MainApp.FOI.split(":")[0].equals("room")){
+        else if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("room")){
 
             //setScreenLocked(false);
             WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
@@ -219,13 +226,19 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
+     if(Median > LUM_THRESHOLD_1) {
+
         this.lastPirReading = thatReading;
 
         if (!zone1) {
 
-            controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
-            zone1TurnedOnTimestamp = thatReading;
-            timer.schedule(new LightTask(timer), LightTask.DELAY);
+            if(Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"delay2")) > 0)
+                turnOnLight_1();
+            else{
+                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
+                zone1TurnedOnTimestamp = thatReading;
+                timer.schedule(new LightTask(timer), LightTask.DELAY);
+            }
 
         } else if (!zone2 && (MainApp.ZONES.length > 1) ) {
 
@@ -248,6 +261,25 @@ public final class FoiController {
               { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
 
         }
+     }
+    }
+
+    public synchronized void turnOnLight_1() {
+
+        LOGGER.info("turnOnLight_1()");
+
+        if (!flag) {
+            firstCall = lastPirReading;
+            flag = true;
+            timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
+        } else if (!zone1) {
+            LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
+            if (lastPirReading - firstCall > 15000) {
+                controlLight(true, 1);
+                timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
+            }
+        }
+
     }
 
     public double getLastLumReading() {
@@ -273,6 +305,15 @@ public final class FoiController {
 
     public boolean isZone2() {
         return zone2;
+    }
+
+    public boolean isFlag() {
+        return this.flag;
+    }
+
+    public void setFlag(final boolean thatFlag) {
+        this.flag = thatFlag;
+
     }
 
     public synchronized void controlLight(final boolean value, final int zone) {

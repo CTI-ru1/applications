@@ -2,6 +2,10 @@ package eu.uberdust;
 
 import eu.uberdust.lights.FoiController;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 /**
  * Entry point.
  */
@@ -16,9 +20,20 @@ public class MainApp {
 
     public static void main(final String[] args) {
 
-        FOI = args[0];
-        ZONES = new String[args.length - 1];
-        System.arraycopy(args, 1, ZONES, 0, args.length - 1);
+        Properties prop = new Properties();
+
+        try {
+            //load a properties file
+            prop.load(new FileInputStream("config.properties"));
+
+             //get the property value and print it out
+            FOI = prop.getProperty("FOI");
+            ZONES = prop.getProperty("ZONES").split(" ");
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
         FoiController.getInstance();
     }
 }
