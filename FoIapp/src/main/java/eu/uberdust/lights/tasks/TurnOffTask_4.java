@@ -1,5 +1,6 @@
 package eu.uberdust.lights.tasks;
 
+import eu.uberdust.MainApp;
 import eu.uberdust.lights.FoiController;
 import org.apache.log4j.Logger;
 
@@ -35,7 +36,7 @@ public class TurnOffTask_4 extends TimerTask {
 
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > DELAY) {
                 LOGGER.info("TurnOffTask_4: Turn off zone 1");
-                FoiController.getInstance().controlLight(false, 1);
+                FoiController.getInstance().controlLight(false,  Integer.parseInt(MainApp.ZONES[0]));
 
             } else {
                 //Re-schedule this timer to run in 5000ms to turn off
