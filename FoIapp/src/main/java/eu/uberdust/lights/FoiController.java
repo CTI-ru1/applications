@@ -8,6 +8,7 @@ import eu.uberdust.lights.tasks.LightTask;
 import eu.uberdust.lights.tasks.TurnOffTask_2;
 import eu.uberdust.lights.tasks.TurnOffTask_3;
 import eu.uberdust.lights.tasks.TurnOffTask_4;
+import javafx.scene.input.MouseDragEvent;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -57,6 +58,8 @@ public final class FoiController {
     public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:"+MainApp.FOI+"/capability/urn:wisebed:node:capability:lz"+MainApp.ZONES[0]+"/json/limit/1";
 
     public static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL,"nodeId").split("0x")[1];
+
+    public static final String MODE = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode");
 
     private long firstCall = 0;
 
@@ -126,6 +129,8 @@ public final class FoiController {
         else if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("room")){
 
             //setScreenLocked(false);
+            setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
+            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
             WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
         }
         //Adding Observer for the last readings
@@ -174,6 +179,7 @@ public final class FoiController {
 
         this.lastLumReading = thatReading;
 
+     if(!MODE.equals("room")){
         if (Median < LUM_THRESHOLD_1) {
 
             if (!isScreenLocked) {
@@ -187,6 +193,7 @@ public final class FoiController {
                 controlLight(true, Integer.parseInt(z));
             //controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
         }
+     }
     }
 
 
@@ -226,7 +233,7 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
-     if(Median > LUM_THRESHOLD_1) {
+     if(Median < LUM_THRESHOLD_1) {
 
         this.lastPirReading = thatReading;
 
@@ -236,6 +243,10 @@ public final class FoiController {
                 turnOnLight_1();
             else{
                 controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
+
+                if(MainApp.ZONES.length > 2){
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
+
                 zone1TurnedOnTimestamp = thatReading;
                 timer.schedule(new LightTask(timer), LightTask.DELAY);
             }
@@ -244,17 +255,20 @@ public final class FoiController {
 
             controlLight(true, Integer.parseInt(MainApp.ZONES[0]));          //3
 
+            if(MainApp.ZONES.length > 2){
+                controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
+
             if (thatReading - zone1TurnedOnTimestamp > 15000) {
 
-                controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
-
                 if(MainApp.ZONES.length > 2)
-                { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
+                 { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
+                else { controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
 
                 zone2TurnedOnTimestamp = thatReading;
             }
         } else if(MainApp.ZONES.length > 1) {
 
+            controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
             controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
 
             if(MainApp.ZONES.length > 2)
@@ -321,12 +335,14 @@ public final class FoiController {
         BYPASS = Boolean.parseBoolean(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"bypass"));
 
         if (!BYPASS){
-            if (zone == Integer.parseInt(MainApp.ZONES[0])) {
+
+            if ( zone == Integer.parseInt(MainApp.ZONES[0]) || (MainApp.ZONES.length > 2 && zone == Integer.parseInt(MainApp.ZONES[1]))) {
+
                         zone1 = value;
-              } else if(MainApp.ZONES.length > 1){
-                if (zone == Integer.parseInt(MainApp.ZONES[1]) || zone == Integer.parseInt(MainApp.ZONES[2])) {
+
+            } else if( (MainApp.ZONES.length == 2 && zone == Integer.parseInt(MainApp.ZONES[1])) || (MainApp.ZONES.length > 2 && zone == Integer.parseInt(MainApp.ZONES[2]))){
+
                         zone2 = value;
-                    }
             }
 
             //Zone = value;
