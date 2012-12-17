@@ -8,7 +8,6 @@ import eu.uberdust.lights.tasks.LightTask;
 import eu.uberdust.lights.tasks.TurnOffTask_2;
 import eu.uberdust.lights.tasks.TurnOffTask_3;
 import eu.uberdust.lights.tasks.TurnOffTask_4;
-import javafx.scene.input.MouseDragEvent;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
