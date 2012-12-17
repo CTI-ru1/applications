@@ -289,7 +289,7 @@ public final class FoiController {
         } else if (!zone1) {
             LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
             if (lastPirReading - firstCall > 15000) {
-                controlLight(true, 1);
+                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
                 timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
             }
         }
