@@ -19,6 +19,7 @@
         <module>listenerWS</module>
         <module>VirtualEntityManager</module>
         <module>SparqlManager</module>
+        <module>FoIapp</module>
     </modules>
 
     <name>Applications</name>
