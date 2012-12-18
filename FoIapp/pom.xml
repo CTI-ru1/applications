@@ -91,6 +91,13 @@
             <artifactId>json</artifactId>
             <version>20090211</version>
         </dependency>
+        <dependency>
+            <groupId>Californium</groupId>
+            <artifactId>Coap</artifactId>
+            <version>1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../lib/ExampleClient.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
@@ -143,7 +150,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <mainClass>eu.uberdust.lights.LightController</mainClass>
+                            <mainClass>eu.uberdust.MainApp</mainClass>
                         </configuration>
                         <goals>
                             <goal>one-jar</goal>
