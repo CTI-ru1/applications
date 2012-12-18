@@ -232,7 +232,7 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
-        LOGGER.info("FOIAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
+        LOGGER.info("FOIAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPp");
 
      if(Median < LUM_THRESHOLD_1) {
 
