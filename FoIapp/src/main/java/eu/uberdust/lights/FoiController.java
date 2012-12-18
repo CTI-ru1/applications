@@ -232,6 +232,8 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
+        LOGGER.info("FOIAPPP");
+
      if(Median < LUM_THRESHOLD_1) {
 
         this.lastPirReading = thatReading;

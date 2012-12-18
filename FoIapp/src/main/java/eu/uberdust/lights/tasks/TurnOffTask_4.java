@@ -20,7 +20,7 @@ public class TurnOffTask_4 extends TimerTask {
 
     private final Timer timer;
 
-    public static final long DELAY = 60000;        //30000
+    public static final long DELAY = 180000;        //30000
 
     public TurnOffTask_4(final Timer thatTimer) {
         super();
