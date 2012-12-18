@@ -31,6 +31,7 @@ public class TurnOffTask_4 extends TimerTask {
     public final void run() {
 
         LOGGER.info("TurnOffTask_4: initialized");
+        LOGGER.info("TurnOffTask_4 DELAY : "+DELAY);
 
         if (FoiController.getInstance().isZone1()) {
 
