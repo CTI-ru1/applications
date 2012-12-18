@@ -29,7 +29,7 @@ public class TurnOffTask_2 extends TimerTask {
 
     private final Timer timer;
 
-    public static long DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"delay"))*1000;
+    public static long DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"lockscreen_delay"))*1000;
 
     private boolean isScreenLocked;
 

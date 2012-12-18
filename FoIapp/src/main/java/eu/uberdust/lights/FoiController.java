@@ -232,7 +232,7 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
-        LOGGER.info("FOIAPPP");
+        LOGGER.info("FOIAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
 
      if(Median < LUM_THRESHOLD_1) {
 
@@ -240,7 +240,7 @@ public final class FoiController {
 
         if (!zone1) {
 
-            if(Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"delay2")) > 0)
+            if(Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"pir_delay")) > 0)
                 turnOnLight_1();
             else{
                 controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
