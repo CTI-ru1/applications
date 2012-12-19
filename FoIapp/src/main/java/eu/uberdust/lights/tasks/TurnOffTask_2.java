@@ -29,8 +29,6 @@ public class TurnOffTask_2 extends TimerTask {
 
     private final Timer timer;
 
-    public static long DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"lockscreen_delay"))*1000;
-
     private boolean isScreenLocked;
 
 
@@ -47,7 +45,7 @@ public class TurnOffTask_2 extends TimerTask {
         isScreenLocked = FoiController.getInstance().isScreenLocked();
 
         if (isScreenLocked) {
-                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked);
+                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked +"lockscreen_delay :"+FoiController.LOCKSCREEN_DELAY);
                 FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
         }
 
