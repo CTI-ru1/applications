@@ -24,11 +24,11 @@ public final class FoiController {
      */
     private static final Logger LOGGER = Logger.getLogger(FoiController.class);
 
-    private boolean Zone;
-
     private boolean zone1;
 
     private boolean zone2;
+
+    private boolean zone3;
 
     private long lastPirReading;
 
@@ -113,9 +113,9 @@ public final class FoiController {
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isScreenLocked -- " + isScreenLocked);
 
-        Zone = false;
         zone1 = false;
         zone2 = false;
+        zone3 = false;
 
         WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
 
@@ -147,7 +147,7 @@ public final class FoiController {
 
             WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
             WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
-            //WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);
+            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);                           //"urn:wisebed:ctitestbed:virtual:room:0.I.2"
 
         }
         //Adding Observer for the last readings
@@ -221,8 +221,16 @@ public final class FoiController {
 
             }else if (Median < LUM_THRESHOLD_2) {
 
-                for(String z : MainApp.ZONES)
-                    controlLight(true, Integer.parseInt(z));
+                if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
+
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+
+                }   else {
+
+                    for(String z : MainApp.ZONES)
+                        controlLight(true, Integer.parseInt(z));
+                }
 
              }else if (Median > LUM_THRESHOLD_1) {
 
@@ -263,8 +271,16 @@ public final class FoiController {
                 }
             }else if (Median < LUM_THRESHOLD_2) {
 
-                for(String z : MainApp.ZONES)
-                    controlLight(true, Integer.parseInt(z));
+                if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
+
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+
+                }   else {
+
+                    for(String z : MainApp.ZONES)
+                        controlLight(true, Integer.parseInt(z));
+                }
 
             }else if (Median > LUM_THRESHOLD_1) {
 
@@ -288,7 +304,7 @@ public final class FoiController {
 
             } else if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
 
-                timer.schedule(new TurnOffTask_2(timer), LOCKSCREEN_DELAY);
+                //timer.schedule(new TurnOffTask_2(timer), LOCKSCREEN_DELAY);
                 controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
             }
         }
@@ -301,52 +317,119 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
-        LOGGER.info("FOIAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpp");
-
-     if(Median < LUM_THRESHOLD_1) {
-
         this.lastPirReading = thatReading;
 
-        if (!zone1) {
+        if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
+            updateLightsState();
+        }else {
+            pirHandler();
+        }
 
-            if(Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"pir_delay")) > 0)
-                turnOnLight_1();
-            else{
-                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
+
+    }
+
+
+
+    public synchronized void updateLightsState() {
+
+        if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
+
+            LOGGER.info("ichatz MODE");
+
+            if (isScreenLocked) {
+
+                if (Median < LUM_THRESHOLD_1) {
+                    //turn on lights
+                    turnOnLights();
+
+                }
+
+            } else if (!isScreenLocked) {
+
+                if (Median < LUM_THRESHOLD_1) {
+
+                    turnOnLight_1();
+
+                }
+
+            }
+
+        } else if (Median < LUM_THRESHOLD_1) {
+
+            LOGGER.info("TURN LIGHTS OOOOOOOOOOOOOON");
+            //turn on lights
+            pirHandler();
+
+        }
+
+    }
+
+    private synchronized void turnOnLights() {
+
+
+        if (!zone1) {
+            controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
+            zone1TurnedOnTimestamp = lastPirReading;
+            timer.schedule(new LightTask(timer), LightTask.DELAY);
+        } else if (!zone2) {
+            controlLight(true,Integer.parseInt(MainApp.ZONES[2]));
+            if (lastPirReading - zone1TurnedOnTimestamp > 15000) {
+                controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+                zone2TurnedOnTimestamp = lastPirReading;
+            }
+        } else {
+
+            controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
+            controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
+        }
+
+    }
+
+
+
+    public synchronized void pirHandler(){
+
+            if (!zone1) {
+
+                if(Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"pir_delay")) > 0)
+                    turnOnLight_1();
+                else{
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
+
+                    if(MainApp.ZONES.length > 2){
+                        controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
+
+                    zone1TurnedOnTimestamp = lastPirReading;
+                    timer.schedule(new LightTask(timer), LightTask.DELAY);
+                }
+
+            } else if (!zone2 && (MainApp.ZONES.length > 1) ) {
+
+                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));          //3
 
                 if(MainApp.ZONES.length > 2){
                     controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
 
-                zone1TurnedOnTimestamp = thatReading;
-                timer.schedule(new LightTask(timer), LightTask.DELAY);
-            }
+                if (lastPirReading - zone1TurnedOnTimestamp > 15000) {
 
-        } else if (!zone2 && (MainApp.ZONES.length > 1) ) {
+                    if(MainApp.ZONES.length > 2)
+                    { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
+                    else { controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
 
-            controlLight(true, Integer.parseInt(MainApp.ZONES[0]));          //3
+                    zone2TurnedOnTimestamp = lastPirReading;
+                }
+            } else if(MainApp.ZONES.length > 1) {
 
-            if(MainApp.ZONES.length > 2){
-                controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
-
-            if (thatReading - zone1TurnedOnTimestamp > 15000) {
+                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
+                controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
 
                 if(MainApp.ZONES.length > 2)
-                 { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
-                else { controlLight(true, Integer.parseInt(MainApp.ZONES[1])); }
+                { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
 
-                zone2TurnedOnTimestamp = thatReading;
             }
-        } else if(MainApp.ZONES.length > 1) {
 
-            controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
-            controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
-
-            if(MainApp.ZONES.length > 2)
-              { controlLight(true, Integer.parseInt(MainApp.ZONES[2]));}
-
-        }
-     }
     }
+
 
     public synchronized void turnOnLight_1() {
 
@@ -359,8 +442,14 @@ public final class FoiController {
         } else if (!zone1) {
             LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
             if (lastPirReading - firstCall > 15000) {
-                controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
-                timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
+
+                if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
+                } else {
+                    controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
+                }
+                PIR_DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"pir_delay"))*1000;
+                timer.schedule(new TurnOffTask_4(timer), PIR_DELAY);
             }
         }
 
@@ -379,16 +468,16 @@ public final class FoiController {
         return this.isScreenLocked;
     }
 
-    public boolean isZone() {
-        return Zone;
-    }
-
     public boolean isZone1() {
         return zone1;
     }
 
     public boolean isZone2() {
         return zone2;
+    }
+
+    public boolean isZone3() {
+        return zone3;
     }
 
     public boolean isFlag() {
@@ -402,7 +491,17 @@ public final class FoiController {
 
     public synchronized void controlLight(final boolean value, final int zone) {
 
-        BYPASS = Boolean.parseBoolean(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"bypass"));
+        if(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"mode").equals("ichatz")){
+
+            if (zone == Integer.parseInt(MainApp.ZONES[2])) {
+                zone1 = value;
+            } else if (zone == Integer.parseInt(MainApp.ZONES[1])){
+                zone2 = value;
+            } else {
+                zone3 = value;
+            }
+
+        }   else {
 
             if ( zone == Integer.parseInt(MainApp.ZONES[0]) || (MainApp.ZONES.length > 2 && zone == Integer.parseInt(MainApp.ZONES[1]))) {
 
@@ -412,8 +511,11 @@ public final class FoiController {
 
                         zone2 = value;
             }
+        }
 
-            //Zone = value;
+
+     BYPASS = Boolean.parseBoolean(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES,"bypass"));
+
       if (!BYPASS){
             UberdustClient.getInstance().sendCoapPost(FOI_ACTUATOR, "lz" + zone, value ? "1" : "0"); //FOI_ACTUATOR
       }

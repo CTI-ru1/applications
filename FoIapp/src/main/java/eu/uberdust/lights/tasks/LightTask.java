@@ -2,6 +2,7 @@ package eu.uberdust.lights.tasks;
 
 import eu.uberdust.MainApp;
 import eu.uberdust.lights.FoiController;
+import eu.uberdust.lights.GetJson;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -36,28 +37,50 @@ public class LightTask extends TimerTask {
         if (FoiController.getInstance().isZone2()) {
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > DELAY) {
                 //turn off zone 2
-                LOGGER.info("Turn off zone 2");
+                    LOGGER.info("Turn off zone 2");
+                if(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"mode").equals("ichatz")){
+                    if (FoiController.getInstance().isScreenLocked()) {
+                        LOGGER.info("LightTask: Turn off zone 2");
+                        FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
 
-                if(MainApp.ZONES.length > 2)
-                   { FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));}
-                else{
-                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
-                }
+                        //Re-schedule this timer to run in 30000ms to turn off
+                        this.timer.schedule(new LightTask(timer), DELAY);
 
-                //Re-schedule this timer to run in 30000ms to turn off
-                this.timer.schedule(new LightTask(timer), DELAY);
+                    } else{
+                        timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
+                        LOGGER.info("EXIT LightTask.");
+                    }
+
+
+                }  else {
+                         if(MainApp.ZONES.length > 2)
+                            { FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));}
+                         else{
+                             FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
+                            }
+
+                        //Re-schedule this timer to run in 30000ms to turn off
+                        this.timer.schedule(new LightTask(timer), DELAY);
+                   }
             } else {
                 //Re-schedule this timer to run in 5000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY / 6);
             }
         } else if (FoiController.getInstance().isZone1()) {
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > 30000) {
+
                 //turn off zone 1
-                FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
-                if(MainApp.ZONES.length > 2){
-                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
+                if(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"mode").equals("ichatz")){
+
+                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));
+
+                }else{
+                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
+                    if(MainApp.ZONES.length > 2){
+                        FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
+                    }
+                    LOGGER.info("Turn off zone 1");
                 }
-                LOGGER.info("Turn off zone 1");
             } else {
                 //Re-schedule this timer to run in 5000ms to turn off
                 this.timer.schedule(new LightTask(timer), DELAY / 6);
