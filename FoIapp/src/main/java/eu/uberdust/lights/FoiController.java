@@ -50,7 +50,7 @@ public final class FoiController {
 
     private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.FOI;
 
-    private static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
     public static final String USER_PREFERENCES = "http://150.140.16.31/api/v1/foi?identifier=" + MainApp.FOI;
 
@@ -129,31 +129,32 @@ public final class FoiController {
         WSReadingsClient.getInstance().setServerUrl(WS_PREFIX + uberdustUrl + "/readings.ws");
 
 
-        initLum();//RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
+        initLum();//Not Needed (Readings come in fast enough to wait for that)//RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
         setLastLumReading(0);//setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST).split("\t")[1]));
-        WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
+        WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
 
         //Subscription for notifications.
-        if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("workstation")) {
+        String mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+        if ("workstation".equals(mode)) {
 
-            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
-            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
+            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
 
-        } else if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("room")) {
+        } else if ("room".equals(mode)) {
 
             //setScreenLocked(false);
-            //DUPLICATE//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
-            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
-            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
+            //DUPLICATE of (1) + not needed//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
 
-        } else if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+        } else if ("ichatz".equals(mode)) {
 
-            //DUPLICATE//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
-            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
+            //DUPLICATE of (1) + not needed//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
+            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
 
-            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
-            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_LIGHT);
-            WSReadingsClient.getInstance().subscribe(this.URN_FOI, MainApp.CAPABILITY_PIR);                           //"urn:wisebed:ctitestbed:virtual:room:0.I.2"
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);                           //"urn:wisebed:ctitestbed:virtual:room:0.I.2"
 
         }
         //Adding Observer for the last readings
@@ -204,9 +205,9 @@ public final class FoiController {
         }
 
         LOGGER.info("Median : " + (sum / WINDOW));
-        this.Median = sum / WINDOW;
+        Median = sum / WINDOW;
 
-        this.lastLumReading = thatReading;
+        lastLumReading = thatReading;
 
         if (!MODE.equals("room")) {
 
@@ -254,7 +255,7 @@ public final class FoiController {
     }
 
     public void setScreenLocked(final boolean screenLocked) {
-        this.isScreenLocked = screenLocked;
+        isScreenLocked = screenLocked;
         updateLight3();
     }
 
@@ -330,7 +331,7 @@ public final class FoiController {
 
     public void setLastPirReading(final long thatReading) {
 
-        this.lastPirReading = thatReading;
+        lastPirReading = thatReading;
 
         if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
             updateLightsState();
@@ -472,16 +473,16 @@ public final class FoiController {
     }
 
     public double getLastLumReading() {
-        return this.lastLumReading;
+        return lastLumReading;
     }
 
     public double getMedian() {
-        return this.Median;
+        return Median;
     }
 
 
     public boolean isScreenLocked() {
-        return this.isScreenLocked;
+        return isScreenLocked;
     }
 
     public boolean isZone1() {
@@ -497,11 +498,11 @@ public final class FoiController {
     }
 
     public boolean isFlag() {
-        return this.flag;
+        return flag;
     }
 
-    public void setFlag(final boolean thatFlag) {
-        this.flag = thatFlag;
+    public void setFlag(final boolean newFlag) {
+        flag = newFlag;
 
     }
 

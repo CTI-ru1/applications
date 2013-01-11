@@ -18,7 +18,6 @@ public class ReadingsObserver implements Observer {
      */
     private static final Logger LOGGER = Logger.getLogger(FoiController.class);
 
-
     /**
      * This method is called whenever the observed object is changed. An
      * application calls an <tt>Observable</tt> object's
@@ -44,28 +43,28 @@ public class ReadingsObserver implements Observer {
 
         for (final Message.NodeReadings.Reading reading : readings.getReadingList()) {
 
-            if (reading.getCapability().equals(MainApp.CAPABILITY_SCREENLOCK)) {
+            if (MainApp.CAPABILITY_SCREENLOCK.equals(reading.getCapability())) {
                 LOGGER.info("New Reading for Screen Lock Capability");
 
                 final String node = "" + reading.getNode().split(":")[2];
-                final boolean isScreenLocked = ((reading.getDoubleReading() == 1)||(reading.getDoubleReading() == 3));
+                final boolean isScreenLocked = ((reading.getDoubleReading() == 1) || (reading.getDoubleReading() == 3));
                 LOGGER.info(new StringBuilder().append("isScreenLocked: ")
                         .append(reading.getDoubleReading()).append(" -- ")
                         .append(isScreenLocked).append(" -- ").append(node).toString());
 
-                    LOGGER.info("Calling setScreenLocked");
-                    FoiController.getInstance().setScreenLocked(isScreenLocked);
+                LOGGER.info("Calling setScreenLocked");
+                FoiController.getInstance().setScreenLocked(isScreenLocked);
 
-            } else if (reading.getCapability().equals(MainApp.CAPABILITY_LIGHT)) {
+            } else if (MainApp.CAPABILITY_LIGHT.equals(reading.getCapability())) {
                 LOGGER.info("New Reading for Light Capability");
 
                 final Double value = reading.getDoubleReading();
                 LOGGER.info("Lum: " + value);
 
                 //if(MainApp.FOI.split(":")[0].equals("workstation")){
-                    FoiController.getInstance().setLastLumReading(value);   //}
+                FoiController.getInstance().setLastLumReading(value);   //}
 
-            } else if (reading.getCapability().equals(MainApp.CAPABILITY_PIR)) {
+            } else if (MainApp.CAPABILITY_PIR.equals(reading.getCapability())) {
 
                 final Double value = reading.getDoubleReading();
 
