@@ -8,6 +8,7 @@ import eu.uberdust.lights.tasks.LightTask;
 import eu.uberdust.lights.tasks.TurnOffTask_2;
 import eu.uberdust.lights.tasks.TurnOffTask_3;
 import eu.uberdust.lights.tasks.TurnOffTask_4;
+import eu.uberdust.util.PropertyReader;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -24,6 +25,8 @@ public final class FoiController {
      * Static Logger.
      */
     private static final Logger LOGGER = Logger.getLogger(FoiController.class);
+    private static final String HTTP_PREFIX = "http://";
+    private static final String WS_PREFIX = "ws://";
 
     private boolean zone1;
 
@@ -41,25 +44,23 @@ public final class FoiController {
 
     private boolean flag;
 
-    public static final int WINDOW = 10;
+    private static final int WINDOW = 10;
 
-    public static Queue luminosityReadings = new PriorityQueue(WINDOW);
+    private static Queue luminosityReadings = new PriorityQueue(WINDOW);
 
-    private static int i = WINDOW - 1;
+    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.FOI;
 
-    public static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.FOI;
-
-    public static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+    private static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
     public static final String USER_PREFERENCES = "http://150.140.16.31/api/v1/foi?identifier=" + MainApp.FOI;
 
-    public static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capabilities/json";
+    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capabilities/json";
 
-    public static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
+    private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
 
-    public static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL, "nodeId").split("0x")[1];
+    private static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL, "nodeId").split("0x")[1];
 
-    public static final String MODE = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+    private static final String MODE = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
 
     public static long LOCKSCREEN_DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "lockscreen_delay")) * 1000;
 
@@ -86,6 +87,7 @@ public final class FoiController {
     private double lastLumReading;
 
     private double Median;
+    private String uberdustUrl;
 
     /**
      * FoiController is loaded on the first execution of FoiController.getInstance()
@@ -108,7 +110,11 @@ public final class FoiController {
     private FoiController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("FOI Controller initializing...");
-        UberdustClient.setUberdustURL("http://uberdust.cti.gr");
+        String uberdustUrl = PropertyReader.getInstance().getProperties().getProperty("uberdust.url") != null ?
+                PropertyReader.getInstance().getProperties().getProperty("uberdust.url") : "uberdust.cti.gr:80";
+        uberdustUrl = uberdustUrl.replaceAll(HTTP_PREFIX, "");
+
+        UberdustClient.setUberdustURL(HTTP_PREFIX + uberdustUrl);
         timer = new Timer();
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
@@ -120,7 +126,7 @@ public final class FoiController {
 
         LOGGER.info(MainApp.FOI.split(":")[0]);
 
-        WSReadingsClient.getInstance().setServerUrl("ws://uberdust.cti.gr:80/readings.ws");
+        WSReadingsClient.getInstance().setServerUrl(WS_PREFIX + uberdustUrl + "/readings.ws");
 
 
         initLum();//RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
@@ -186,13 +192,10 @@ public final class FoiController {
 
         double sum = 0;
 
-        LOGGER.info(" i : " + i);
-
         luminosityReadings.remove();
         luminosityReadings.add(thatReading);
 
         LOGGER.info("thatReading : " + thatReading);
-        LOGGER.info(" i : " + i);
 
         LOGGER.info(luminosityReadings.toString());
         for (Object d : luminosityReadings.toArray()) {

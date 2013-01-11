@@ -1,0 +1,10 @@
+#exaple configuration file for the FOI Application
+
+#the FOI object the application will monitor and control
+FOI=room:0.I.11
+
+#contains the zones that the actuator will control
+ZONES=1 2 3
+
+#UBERDUST url (optional)
+uberdust.url=uberdust.cti.gr
