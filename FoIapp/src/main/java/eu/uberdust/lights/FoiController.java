@@ -137,7 +137,7 @@ public final class FoiController {
         String mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
         if ("workstation".equals(mode)) {
 
-            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
+            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
 
         } else if ("room".equals(mode)) {
@@ -150,7 +150,7 @@ public final class FoiController {
         } else if ("ichatz".equals(mode)) {
 
             //DUPLICATE of (1) + not needed//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
-            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
+            setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
 
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
