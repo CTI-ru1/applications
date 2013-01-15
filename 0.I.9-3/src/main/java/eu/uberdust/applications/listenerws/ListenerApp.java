@@ -61,7 +61,7 @@ public class ListenerApp implements Observer {
         zone = (String) prop.get("zone");
         LOGGER.info(server);
 
-        UberdustClient.setUberdustURL("http://uberdust.cti.gr");
+        UberdustClient.setUberdustURL("http://uberdust.cti.gr:80");
 
         ActionManager.getInstance().setActuator(actuator, zone);
 
