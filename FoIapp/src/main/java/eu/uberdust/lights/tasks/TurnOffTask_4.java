@@ -24,7 +24,6 @@ public class TurnOffTask_4 extends TimerTask {
     public static final long DELAY = 30000;        //180000
 
 
-
     public TurnOffTask_4(final Timer thatTimer) {
         super();
         this.timer = thatTimer;
@@ -34,21 +33,21 @@ public class TurnOffTask_4 extends TimerTask {
     public final void run() {
 
         LOGGER.info("TurnOffTask_4: initialized");
-        LOGGER.info("TurnOffTask_4 DELAY : "+FoiController.PIR_DELAY);
+        LOGGER.info("TurnOffTask_4 DELAY : " + FoiController.getInstance().getPirDelay());
 
         if (FoiController.getInstance().isZone1()) {
 
-            if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > FoiController.PIR_DELAY) {
+            if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > FoiController.getInstance().getPirDelay()) {
                 LOGGER.info("TurnOffTask_4: Turn off zone 1");
-                if(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"mode").equals("ichatz")){
-                    FoiController.getInstance().controlLight(false,  Integer.parseInt(MainApp.ZONES[2]));
-                }else {
-                    FoiController.getInstance().controlLight(false,  Integer.parseInt(MainApp.ZONES[0]));
+                if (GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "mode").equals("ichatz")) {
+                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));
+                } else {
+                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
                 }
 
             } else {
                 //Re-schedule this timer to run in 5000ms to turn off
-                this.timer.schedule(new TurnOffTask_4(timer), FoiController.PIR_DELAY / 6);
+                this.timer.schedule(new TurnOffTask_4(timer), FoiController.getInstance().getPirDelay() / 6);
             }
 
 

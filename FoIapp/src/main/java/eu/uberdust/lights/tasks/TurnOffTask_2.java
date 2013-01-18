@@ -10,7 +10,6 @@ package eu.uberdust.lights.tasks;
 
 import eu.uberdust.MainApp;
 import eu.uberdust.lights.FoiController;
-import eu.uberdust.lights.GetJson;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -45,7 +44,7 @@ public class TurnOffTask_2 extends TimerTask {
         isScreenLocked = FoiController.getInstance().isScreenLocked();
 
         if (isScreenLocked) {
-                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked +"lockscreen_delay :"+FoiController.LOCKSCREEN_DELAY);
+                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked +"lockscreen_delay :"+FoiController.getInstance().getLockscreenDelay());
                 FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
         }
 

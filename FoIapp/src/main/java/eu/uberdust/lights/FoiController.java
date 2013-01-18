@@ -60,11 +60,19 @@ public final class FoiController {
 
     private static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL, "nodeId").split("0x")[1];
 
-    private static final String MODE = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+    private String mode;
 
-    public static long LOCKSCREEN_DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "lockscreen_delay")) * 1000;
+    private long lockscreenDelay;
 
-    public static long PIR_DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "pir_delay")) * 1000;
+    public long getLockscreenDelay() {
+        return lockscreenDelay;
+    }
+
+    private long pirDelay;
+
+    public long getPirDelay() {
+        return pirDelay;
+    }
 
     private long firstCall = 0;
 
@@ -78,9 +86,9 @@ public final class FoiController {
      */
     private static FoiController ourInstance = null;
 
-    public static double LUM_THRESHOLD_1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
+    private double lumThreshold1;
 
-    public static double LUM_THRESHOLD_2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
+    private double lumThreshold2;
 
     public static boolean BYPASS = false;
 
@@ -104,12 +112,44 @@ public final class FoiController {
         return ourInstance;
     }
 
+    private void updateLum1Threshold() {
+        try {
+            lumThreshold1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
+        } catch (NullPointerException npe) {
+            lumThreshold1 = 350;
+        }
+    }
+
+    private void updateLum2Threshold() {
+        try {
+            lumThreshold2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
+        } catch (NullPointerException npe) {
+            lumThreshold2 = 350;
+        }
+    }
+
     /**
      * Private constructor suppresses generation of a (public) default constructor.
      */
     private FoiController() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("FOI Controller initializing...");
+        mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+        LOGGER.info(mode);
+        try {
+            lockscreenDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "lockscreen_delay")) * 1000;
+        } catch (NumberFormatException npe) {
+            lockscreenDelay = 1000;
+        }
+        try {
+            pirDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "pir_delay")) * 1000;
+        } catch (NumberFormatException npe) {
+            pirDelay = 1000;
+        }
+        updateLum1Threshold();
+        updateLum2Threshold();
+
+
         String uberdustUrl = PropertyReader.getInstance().getProperties().getProperty("uberdust.url") != null ?
                 PropertyReader.getInstance().getProperties().getProperty("uberdust.url") : "uberdust.cti.gr:80";
         uberdustUrl = uberdustUrl.replaceAll(HTTP_PREFIX, "");
@@ -187,8 +227,8 @@ public final class FoiController {
 
     public void setLastLumReading(final double thatReading) {
 
-        LUM_THRESHOLD_1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
-        LUM_THRESHOLD_2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
+        updateLum1Threshold();
+        updateLum2Threshold();
 
 
         double sum = 0;
@@ -209,11 +249,11 @@ public final class FoiController {
 
         lastLumReading = thatReading;
 
-        if (!MODE.equals("room")) {
+        if (!"room".equals(mode)) {
 
             if (!isScreenLocked) {
 
-                if (Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2) {
+                if (Median < lumThreshold1 && lastLumReading > lumThreshold2) {
 
                     controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
 
@@ -226,14 +266,14 @@ public final class FoiController {
                             controlLight(false, Integer.parseInt(z));
                         }
 
-                    } else if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+                    } else if ("ichatz".equals(mode)) {
 
                         controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
                     }
 
-                } else if (Median < LUM_THRESHOLD_2) {
+                } else if (Median < lumThreshold2) {
 
-                    if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+                    if ("ichatz".equals(mode)) {
 
                         controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
                         controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
@@ -244,7 +284,7 @@ public final class FoiController {
                             controlLight(true, Integer.parseInt(z));
                     }
 
-                } else if (Median > LUM_THRESHOLD_1) {
+                } else if (Median > lumThreshold1) {
 
                     for (String z : MainApp.ZONES)
                         controlLight(false, Integer.parseInt(z));
@@ -261,11 +301,11 @@ public final class FoiController {
 
     public synchronized void updateLight3() {
 
-        LUM_THRESHOLD_1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
-        LUM_THRESHOLD_2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
+        lumThreshold1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
+        lumThreshold2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
 
         if (!isScreenLocked) {
-            if (Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2) {
+            if (Median < lumThreshold1 && lastLumReading > lumThreshold2) {
 
                 controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
 
@@ -282,7 +322,7 @@ public final class FoiController {
 
                     controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
                 }
-            } else if (Median < LUM_THRESHOLD_2) {
+            } else if (Median < lumThreshold2) {
 
                 if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
 
@@ -295,7 +335,7 @@ public final class FoiController {
                         controlLight(true, Integer.parseInt(z));
                 }
 
-            } else if (Median > LUM_THRESHOLD_1) {
+            } else if (Median > lumThreshold1) {
 
                 for (String z : MainApp.ZONES)
                     controlLight(false, Integer.parseInt(z));
@@ -303,9 +343,9 @@ public final class FoiController {
 
         } else if (isScreenLocked) {
 
-            LOCKSCREEN_DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "lockscreen_delay")) * 1000;
+            lockscreenDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "lockscreen_delay")) * 1000;
 
-            timer.schedule(new TurnOffTask_2(timer), LOCKSCREEN_DELAY);
+            timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
 
             if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("workstation")) {
 
@@ -318,7 +358,7 @@ public final class FoiController {
 
             } else if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
 
-                //timer.schedule(new TurnOffTask_2(timer), LOCKSCREEN_DELAY);
+                //timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
                 controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
             }
         }
@@ -351,7 +391,7 @@ public final class FoiController {
 
             if (isScreenLocked) {
 
-                if (Median < LUM_THRESHOLD_1) {
+                if (Median < lumThreshold1) {
                     //turn on lights
                     turnOnLights();
 
@@ -359,7 +399,7 @@ public final class FoiController {
 
             } else if (!isScreenLocked) {
 
-                if (Median < LUM_THRESHOLD_1) {
+                if (Median < lumThreshold1) {
 
                     turnOnLight_1();
 
@@ -367,7 +407,7 @@ public final class FoiController {
 
             }
 
-        } else if (Median < LUM_THRESHOLD_1) {
+        } else if (Median < lumThreshold1) {
 
             LOGGER.info("TURN LIGHTS OOOOOOOOOOOOOON");
             //turn on lights
@@ -465,8 +505,8 @@ public final class FoiController {
                 } else {
                     controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
                 }
-                PIR_DELAY = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "pir_delay")) * 1000;
-                timer.schedule(new TurnOffTask_4(timer), PIR_DELAY);
+                pirDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "pir_delay")) * 1000;
+                timer.schedule(new TurnOffTask_4(timer), pirDelay);
             }
         }
 
@@ -508,7 +548,7 @@ public final class FoiController {
 
     public synchronized void controlLight(final boolean value, final int zone) {
 
-        if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+        if ("ichatz".equals(mode)) {
 
             if (zone == Integer.parseInt(MainApp.ZONES[2])) {
                 zone1 = value;
