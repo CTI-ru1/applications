@@ -44,23 +44,25 @@ public final class FoiController {
 
     private boolean flag;
 
+
+
     private static final int WINDOW = 10;
 
     private static Queue luminosityReadings = new PriorityQueue(WINDOW);
 
-    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.FOI;
-
-    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
-
     public static final String USER_PREFERENCES = "http://uberdust.cti.gr:3000/api/v1/foi?identifier=" + MainApp.FOI;
 
-    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capabilities/json";
+    private static String mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
 
-    private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
+    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:"+ mode +":"+ MainApp.FOI;
+
+    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode +":"+ MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+
+    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode +":"+ MainApp.FOI + "/capabilities/json";
+
+    private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode +":"+ MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
 
     private static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL, "nodeId").split("0x")[1];
-
-    private String mode;
 
     private long lockscreenDelay;
 
@@ -136,9 +138,11 @@ public final class FoiController {
      * Private constructor suppresses generation of a (public) default constructor.
      */
     private FoiController() {
+
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("FOI Controller initializing...");
         mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+
         LOGGER.info(mode);
         try {
             lockscreenDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "lockscreen_delay")) * 1000;
@@ -168,7 +172,7 @@ public final class FoiController {
         zone2 = false;
         zone3 = false;
 
-        LOGGER.info(MainApp.FOI.split(":")[0]);
+        LOGGER.info(MainApp.FOI);
 
         WSReadingsClient.getInstance().setServerUrl(WS_PREFIX + uberdustUrl + "/readings.ws");
 
