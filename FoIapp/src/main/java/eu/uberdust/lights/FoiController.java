@@ -52,7 +52,7 @@ public final class FoiController {
 
     private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
-    public static final String USER_PREFERENCES = "http://150.140.16.31/api/v1/foi?identifier=" + MainApp.FOI;
+    public static final String USER_PREFERENCES = "http://uberdust.cti.gr:3000/api/v1/foi?identifier=" + MainApp.FOI;
 
     private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.FOI + "/capabilities/json";
 
@@ -117,6 +117,8 @@ public final class FoiController {
             lumThreshold1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
         } catch (NullPointerException npe) {
             lumThreshold1 = 350;
+        } catch (NumberFormatException nfe) {
+            lumThreshold1 = 350;
         }
     }
 
@@ -124,6 +126,8 @@ public final class FoiController {
         try {
             lumThreshold2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
         } catch (NullPointerException npe) {
+            lumThreshold2 = 350;
+        } catch (NumberFormatException nfe) {
             lumThreshold2 = 350;
         }
     }

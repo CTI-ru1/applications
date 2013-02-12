@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+
 /**
  * Created by IntelliJ IDEA.
  * User: dimitris
@@ -46,7 +47,7 @@ public class GetJson {
     }
 
     public String callGetJsonWebService(final String address, final String pref) {
-
+        LOGGER.info(address + " PREF " + pref);
         try {
             final URL url = new URL(address);
             final URLConnection yc;
@@ -74,7 +75,7 @@ public class GetJson {
                 JSONObject json2 = new JSONObject(parse1);
 
                 val = json2.getString(pref);
-            }  else if (the_json.startsWith("{")){
+            } else if (the_json.startsWith("{")) {
 
                 JSONObject json2 = new JSONObject(the_json);
 
