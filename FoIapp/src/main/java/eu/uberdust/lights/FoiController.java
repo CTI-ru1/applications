@@ -1,6 +1,7 @@
 package eu.uberdust.lights;
 
 import eu.uberdust.MainApp;
+import eu.uberdust.ProfileManager;
 import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
@@ -45,22 +46,21 @@ public final class FoiController {
     private boolean flag;
 
 
-
     private static final int WINDOW = 10;
 
     private static Queue luminosityReadings = new PriorityQueue(WINDOW);
 
-    public static final String USER_PREFERENCES = "http://uberdust.cti.gr:3000/api/v1/foi?identifier=" + MainApp.FOI;
+//    public static final String USER_PREFERENCES = "http://uberdust.cti.gr:3000/api/v1/foi?identifier=" + MainApp.FOI;
 
-    private static String mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+    private static String mode = "";//GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
 
-    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:"+ mode +":"+ MainApp.FOI;
+    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI;
 
-    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode +":"+ MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
-    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode +":"+ MainApp.FOI + "/capabilities/json";
+    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI + "/capabilities/json";
 
-    private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode +":"+ MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
+    private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
 
     private static final String FOI_ACTUATOR = GetJson.getInstance().callGetJsonWebService(ACTUATOR_URL, "nodeId").split("0x")[1];
 
@@ -116,7 +116,7 @@ public final class FoiController {
 
     private void updateLum1Threshold() {
         try {
-            lumThreshold1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
+            lumThreshold1 = Double.parseDouble(ProfileManager.getInstance().getElement("illumination"));  //350
         } catch (NullPointerException npe) {
             lumThreshold1 = 350;
         } catch (NumberFormatException nfe) {
@@ -126,7 +126,7 @@ public final class FoiController {
 
     private void updateLum2Threshold() {
         try {
-            lumThreshold2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
+            lumThreshold2 = Double.parseDouble(ProfileManager.getInstance().getElement("illumination2"));  //350
         } catch (NullPointerException npe) {
             lumThreshold2 = 350;
         } catch (NumberFormatException nfe) {
@@ -141,16 +141,16 @@ public final class FoiController {
 
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("FOI Controller initializing...");
-        mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+        mode = ProfileManager.getInstance().getElement("mode");
 
         LOGGER.info(mode);
         try {
-            lockscreenDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "lockscreen_delay")) * 1000;
+            lockscreenDelay = Long.parseLong(ProfileManager.getInstance().getElement("lockscreen_delay")) * 1000;
         } catch (NumberFormatException npe) {
             lockscreenDelay = 1000;
         }
         try {
-            pirDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "pir_delay")) * 1000;
+            pirDelay = Long.parseLong(ProfileManager.getInstance().getElement("pir_delay")) * 1000;
         } catch (NumberFormatException npe) {
             pirDelay = 1000;
         }
@@ -163,6 +163,8 @@ public final class FoiController {
         uberdustUrl = uberdustUrl.replaceAll(HTTP_PREFIX, "");
 
         UberdustClient.setUberdustURL(HTTP_PREFIX + uberdustUrl);
+
+
         timer = new Timer();
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
@@ -182,7 +184,7 @@ public final class FoiController {
         WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
 
         //Subscription for notifications.
-        String mode = GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+        String mode = ProfileManager.getInstance().getElement("mode");
         if ("workstation".equals(mode)) {
 
             setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
@@ -265,7 +267,7 @@ public final class FoiController {
 
                     controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
 
-                    if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("workstation")) {
+                    if ("workstation".equals(mode)) {
 
                         String[] temp = new String[MainApp.ZONES.length - 1];
                         System.arraycopy(MainApp.ZONES, 1, temp, 0, MainApp.ZONES.length - 1);
@@ -309,15 +311,15 @@ public final class FoiController {
 
     public synchronized void updateLight3() {
 
-        lumThreshold1 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination"));  //350
-        lumThreshold2 = Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "illumination2"));  //350
+        lumThreshold1 = Double.parseDouble(ProfileManager.getInstance().getElement("illumination"));  //350
+        lumThreshold2 = Double.parseDouble(ProfileManager.getInstance().getElement("illumination2"));  //350
 
         if (!isScreenLocked) {
             if (Median < lumThreshold1 && lastLumReading > lumThreshold2) {
 
                 controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
 
-                if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("workstation")) {
+                if ("workstation".equals(mode)) {
 
                     String[] temp = new String[MainApp.ZONES.length - 1];
                     System.arraycopy(MainApp.ZONES, 1, temp, 0, MainApp.ZONES.length - 1);
@@ -326,13 +328,13 @@ public final class FoiController {
                         controlLight(false, Integer.parseInt(z));
                     }
 
-                } else if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+                } else if ("ichatz".equals(mode)) {
 
                     controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
                 }
             } else if (Median < lumThreshold2) {
 
-                if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+                if ("ichatz".equals(mode)) {
 
                     controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
                     controlLight(true, Integer.parseInt(MainApp.ZONES[1]));
@@ -351,11 +353,11 @@ public final class FoiController {
 
         } else if (isScreenLocked) {
 
-            lockscreenDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "lockscreen_delay")) * 1000;
+            lockscreenDelay = Long.parseLong(ProfileManager.getInstance().getElement("lockscreen_delay")) * 1000;
 
             timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
 
-            if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("workstation")) {
+            if ("workstation".equals(mode)) {
 
                 String[] temp = new String[MainApp.ZONES.length - 1];
                 System.arraycopy(MainApp.ZONES, 1, temp, 0, MainApp.ZONES.length - 1);
@@ -364,7 +366,7 @@ public final class FoiController {
                     controlLight(false, Integer.parseInt(z));
                 }
 
-            } else if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+            } else if ("ichatz".equals(mode)) {
 
                 //timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
                 controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
@@ -381,7 +383,7 @@ public final class FoiController {
 
         lastPirReading = thatReading;
 
-        if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+        if ("ichatz".equals(mode)) {
             updateLightsState();
         } else {
             pirHandler();
@@ -393,7 +395,7 @@ public final class FoiController {
 
     public synchronized void updateLightsState() {
 
-        if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+        if ("ichatz".equals(mode)) {
 
             LOGGER.info("ichatz MODE");
 
@@ -448,10 +450,10 @@ public final class FoiController {
 
 
     public synchronized void pirHandler() {
-
+        LOGGER.info("pirHandler " + zone1 + " " + zone2 + " " + zone3);
         if (!zone1) {
 
-            if (Double.parseDouble(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "pir_delay")) > 0)
+            if (Double.parseDouble(ProfileManager.getInstance().getElement("pir_delay")) > 0)
                 turnOnLight_1();
             else {
                 controlLight(true, Integer.parseInt(MainApp.ZONES[0]));        //3
@@ -498,7 +500,7 @@ public final class FoiController {
 
     public synchronized void turnOnLight_1() {
 
-        LOGGER.info("turnOnLight_1()");
+        LOGGER.info("turnOnLight_1() " + flag);
 
         if (!flag) {
             firstCall = lastPirReading;
@@ -506,14 +508,14 @@ public final class FoiController {
             timer.schedule(new TurnOffTask_3(timer), TurnOffTask_3.DELAY);
         } else if (!zone1) {
             LOGGER.info("lastPirReading - firstCall = " + (lastPirReading - firstCall));
-            if (lastPirReading - firstCall > 15000) {
+            if (lastPirReading - firstCall > 1000) {
 
-                if (GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode").equals("ichatz")) {
+                if ("ichatz".equals(mode)) {
                     controlLight(true, Integer.parseInt(MainApp.ZONES[2]));
                 } else {
                     controlLight(true, Integer.parseInt(MainApp.ZONES[0]));
                 }
-                pirDelay = Long.parseLong(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "pir_delay")) * 1000;
+                pirDelay = Long.parseLong(ProfileManager.getInstance().getElement("pir_delay")) * 1000 + 10000;
                 timer.schedule(new TurnOffTask_4(timer), pirDelay);
             }
         }
@@ -555,7 +557,7 @@ public final class FoiController {
     }
 
     public synchronized void controlLight(final boolean value, final int zone) {
-
+        LOGGER.info("Controlling zone " + zone + " " + value);
         if ("ichatz".equals(mode)) {
 
             if (zone == Integer.parseInt(MainApp.ZONES[2])) {
@@ -578,10 +580,10 @@ public final class FoiController {
             }
         }
 
-
-        BYPASS = Boolean.parseBoolean(GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "bypass"));
-
+        BYPASS = Boolean.parseBoolean(ProfileManager.getInstance().getElement("bypass"));
+        LOGGER.info("BYPASS = " + BYPASS);
         if (!BYPASS) {
+            LOGGER.error("Calling UberdustClient");
             UberdustClient.getInstance().sendCoapPost(FOI_ACTUATOR, "lz" + zone, value ? "1" : "0"); //FOI_ACTUATOR
         }
     }

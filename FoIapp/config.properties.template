@@ -8,3 +8,4 @@ ZONES=1 2 3
 
 #UBERDUST url (optional)
 uberdust.url=uberdust.cti.gr
+profiles.url=uberdust.cti.gr

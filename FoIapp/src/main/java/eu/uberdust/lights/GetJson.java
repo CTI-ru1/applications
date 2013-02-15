@@ -47,7 +47,7 @@ public class GetJson {
     }
 
     public String callGetJsonWebService(final String address, final String pref) {
-        LOGGER.info(address + " PREF " + pref);
+        //LOGGER.info(address + " PREF " + pref);
         try {
             final URL url = new URL(address);
             final URLConnection yc;
@@ -63,7 +63,7 @@ public class GetJson {
             }
             in.close();
 
-            LOGGER.info(inputLine.toString());
+            //LOGGER.info(inputLine.toString());
             String the_json = inputLine.toString();
 
             String val = null;

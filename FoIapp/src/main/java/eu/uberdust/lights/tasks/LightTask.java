@@ -1,6 +1,7 @@
 package eu.uberdust.lights.tasks;
 
 import eu.uberdust.MainApp;
+import eu.uberdust.ProfileManager;
 import eu.uberdust.lights.FoiController;
 import eu.uberdust.lights.GetJson;
 import org.apache.log4j.Logger;
@@ -38,7 +39,7 @@ public class LightTask extends TimerTask {
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > DELAY) {
                 //turn off zone 2
                     LOGGER.info("Turn off zone 2");
-                if(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"mode").equals("ichatz")){
+                if("ichatz".equals(ProfileManager.getInstance().getElement("mode"))){
                     if (FoiController.getInstance().isScreenLocked()) {
                         LOGGER.info("LightTask: Turn off zone 2");
                         FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
@@ -70,7 +71,7 @@ public class LightTask extends TimerTask {
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > 30000) {
 
                 //turn off zone 1
-                if(GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES,"mode").equals("ichatz")){
+                if("ichatz".equals(ProfileManager.getInstance().getElement("mode"))){
 
                     FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));
 

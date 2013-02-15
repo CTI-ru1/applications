@@ -1,8 +1,8 @@
 package eu.uberdust.lights.tasks;
 
 import eu.uberdust.MainApp;
+import eu.uberdust.ProfileManager;
 import eu.uberdust.lights.FoiController;
-import eu.uberdust.lights.GetJson;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -39,7 +39,7 @@ public class TurnOffTask_4 extends TimerTask {
 
             if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > FoiController.getInstance().getPirDelay()) {
                 LOGGER.info("TurnOffTask_4: Turn off zone 1");
-                if (GetJson.getInstance().callGetJsonWebService(FoiController.USER_PREFERENCES, "mode").equals("ichatz")) {
+                if ("ichatz".equals(ProfileManager.getInstance().getElement("mode"))) {
                     FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));
                 } else {
                     FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));

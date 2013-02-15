@@ -7,7 +7,9 @@ import eu.uberdust.util.PropertyReader;
  * Entry point.
  */
 public class MainApp {
-
+    private final static String FOI_PROPERTY = "FOI";
+    private final static String ZONES_PROPERTY = "ZONES";
+    private final static String PROFILES_URL_PROPERTY = "profiles.url";
     public static String FOI;
     public static String[] ZONES;
     public static final String CAPABILITY_LIGHT = "urn:wisebed:node:capability:light";
@@ -21,9 +23,12 @@ public class MainApp {
         //load a properties file
         PropertyReader.getInstance().setFile("config.properties");
 
+
         //get the property value and print it out
-        FOI = PropertyReader.getInstance().getProperties().getProperty("FOI");
-        ZONES = PropertyReader.getInstance().getProperties().getProperty("ZONES").split(" ");
+        FOI = PropertyReader.getInstance().getProperties().getProperty(FOI_PROPERTY);
+        ZONES = PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY).split(" ");
+        ProfileManager.getInstance().setAddress(PropertyReader.getInstance().getProperties().getProperty(PROFILES_URL_PROPERTY));
+        ProfileManager.getInstance().setIdentifier(FOI);
         FoiController.getInstance();
     }
 }
