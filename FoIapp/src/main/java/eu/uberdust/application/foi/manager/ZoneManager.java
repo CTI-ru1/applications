@@ -1,6 +1,6 @@
 package eu.uberdust.application.foi.manager;
 
-import eu.uberdust.MainApp;
+import eu.uberdust.application.foi.MainApp;
 import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.application.foi.util.GetJson;
 import org.apache.log4j.Logger;

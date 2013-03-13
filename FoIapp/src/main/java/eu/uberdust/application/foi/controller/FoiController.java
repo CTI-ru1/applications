@@ -1,6 +1,7 @@
 package eu.uberdust.application.foi.controller;
 
-import eu.uberdust.MainApp;
+
+import eu.uberdust.application.foi.MainApp;
 import eu.uberdust.application.foi.manager.PresenseManager;
 import eu.uberdust.application.foi.manager.ProfileManager;
 import eu.uberdust.application.foi.manager.ZoneManager;

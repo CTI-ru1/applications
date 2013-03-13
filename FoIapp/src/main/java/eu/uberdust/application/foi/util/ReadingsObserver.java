@@ -1,6 +1,6 @@
 package eu.uberdust.application.foi.util;
 
-import eu.uberdust.MainApp;
+import eu.uberdust.application.foi.MainApp;
 import eu.uberdust.application.foi.controller.FoiController;
 import eu.uberdust.communication.protobuf.Message;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;

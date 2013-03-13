@@ -8,7 +8,7 @@ package eu.uberdust.application.foi.task;
  * To change this template use File | Settings | File Templates.
  */
 
-import eu.uberdust.MainApp;
+import eu.uberdust.application.foi.MainApp;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
