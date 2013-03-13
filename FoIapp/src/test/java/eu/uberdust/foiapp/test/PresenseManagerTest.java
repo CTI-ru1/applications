@@ -31,40 +31,65 @@ public class PresenseManagerTest
     }
 
     /**
+     * Simulates a person entering the Room and Staying there for the whole duration of the Test.
+     */
+    public void testContinous() {
+        try {
+            PresenseManager.getInstance().reset();
+            //Stays Empty at the beggining
+            for (int i = 0; i < 2; i++) {
+                assertEquals(PresenseManager.EMPTY, PresenseManager.getInstance().getCurrentState());
+            }
+            //Becomes a NEW_ENTRY for PIR_DELAY
+            for (int i = 0; i < 2; i++) {
+                PresenseManager.getInstance().addReading(creatOccupiedReading());
+                assertEquals(PresenseManager.NEW_ENTRY, PresenseManager.getInstance().getCurrentState());
+                Thread.sleep(500);
+            }
+            for (int i = 0; i < 40; i++) {
+                PresenseManager.getInstance().addReading(creatOccupiedReading());
+                assertEquals(PresenseManager.OCCUPIED, PresenseManager.getInstance().getCurrentState());
+                Thread.sleep(500);
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+    /**
      * Rigourous Test :-)
      */
-    public void testApp() {
+    public void testComeAndGo() {
         try {
-            PresenseManager.getInstance();
+            PresenseManager.getInstance().reset();
             //Stays Empty at the beggining
-            for (int i = 0; i < 4; i++) {
-                assertEquals(PresenseManager.EMPTY, PresenseManager.getInstance().getPrevState());
+            for (int i = 0; i < 2; i++) {
+                assertEquals(PresenseManager.EMPTY, PresenseManager.getInstance().getCurrentState());
             }
-            //Becomes a NEW_ENTRY for 2*PIR_DELAY
-            for (int i = 0; i < 4; i++) {
+            //Becomes a NEW_ENTRY for PIR_DELAY
+            for (int i = 0; i < 2; i++) {
                 PresenseManager.getInstance().addReading(creatOccupiedReading());
-                assertEquals(PresenseManager.NEW_ENTRY, PresenseManager.getInstance().getPrevState());
+                assertEquals(PresenseManager.NEW_ENTRY, PresenseManager.getInstance().getCurrentState());
                 Thread.sleep(500);
             }
             //Becomes and stays OCCUPIED while having events
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 2; i++) {
                 PresenseManager.getInstance().addReading(creatOccupiedReading());
-                assertEquals(PresenseManager.OCCUPIED, PresenseManager.getInstance().getPrevState());
+                assertEquals(PresenseManager.OCCUPIED, PresenseManager.getInstance().getCurrentState());
                 Thread.sleep(500);
             }
-            //Stays OCCUPIED for PIR_DELAY {500+500}
-            assertEquals(PresenseManager.OCCUPIED, PresenseManager.getInstance().getPrevState());
+            //Stays OCCUPIED for PIR_DELAY {500}
+            assertEquals(PresenseManager.OCCUPIED, PresenseManager.getInstance().getCurrentState());
             Thread.sleep(500);
 
-            //Stays LEFT for another PIR_DELAY {500+500}
-            assertEquals(PresenseManager.LEFT, PresenseManager.getInstance().getPrevState());
-            Thread.sleep(500);
-            assertEquals(PresenseManager.LEFT, PresenseManager.getInstance().getPrevState());
+            //Stays LEFT for another PIR_DELAY {500}
+            assertEquals(PresenseManager.LEFT, PresenseManager.getInstance().getCurrentState());
             Thread.sleep(500);
 
             //Stays EMPTY forvever
-            for (int i = 0; i < 4; i++) {
-                assertEquals(PresenseManager.EMPTY, PresenseManager.getInstance().getPrevState());
+            for (int i = 0; i < 2; i++) {
+                assertEquals(PresenseManager.EMPTY, PresenseManager.getInstance().getCurrentState());
                 Thread.sleep(500);
             }
         } catch (InterruptedException e) {

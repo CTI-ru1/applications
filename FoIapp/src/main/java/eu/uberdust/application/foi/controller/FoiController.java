@@ -172,7 +172,7 @@ public final class FoiController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                switch (PresenseManager.getInstance().getPrevState()) {
+                switch (PresenseManager.getInstance().getCurrentState()) {
                     case PresenseManager.EMPTY:
                         ZoneManager.getInstance().switchOffAll();
                         break;
