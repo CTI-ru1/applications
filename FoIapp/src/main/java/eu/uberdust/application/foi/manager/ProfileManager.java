@@ -1,4 +1,4 @@
-package eu.uberdust;
+package eu.uberdust.application.foi.manager;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;

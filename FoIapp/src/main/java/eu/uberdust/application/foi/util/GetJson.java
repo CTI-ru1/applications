@@ -1,4 +1,4 @@
-package eu.uberdust.lights;
+package eu.uberdust.application.foi.util;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;

@@ -1,4 +1,4 @@
-package eu.uberdust.lights.tasks;
+package eu.uberdust.application.foi.task;
 
 /**
  * Created by IntelliJ IDEA.
@@ -9,7 +9,6 @@ package eu.uberdust.lights.tasks;
  */
 
 import eu.uberdust.MainApp;
-import eu.uberdust.lights.FoiController;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -39,14 +38,14 @@ public class TurnOffTask_2 extends TimerTask {
 
     @Override
     public final void run() {
-        LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
-
-        isScreenLocked = FoiController.getInstance().isScreenLocked();
-
-        if (isScreenLocked) {
-                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked +"lockscreen_delay :"+FoiController.getInstance().getLockscreenDelay());
-                FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
-        }
+//        LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
+//
+//        isScreenLocked = FoiController.getInstance().isScreenLocked();
+//
+//        if (isScreenLocked) {
+//                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked +"lockscreen_delay :"+FoiController.getInstance().getLockscreenDelay());
+//                FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
+//        }
 
     }
 

@@ -1,6 +1,6 @@
-package eu.uberdust.lights.tasks;
+package eu.uberdust.application.foi.task;
 
-import eu.uberdust.lights.FoiController;
+import eu.uberdust.application.foi.controller.FoiController;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;

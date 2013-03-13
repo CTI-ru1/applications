@@ -1,6 +1,8 @@
-package eu.uberdust;
+package eu.uberdust.application.foi;
 
-import eu.uberdust.lights.FoiController;
+import eu.uberdust.application.foi.manager.ProfileManager;
+import eu.uberdust.application.foi.manager.ZoneManager;
+import eu.uberdust.application.foi.controller.FoiController;
 import eu.uberdust.util.PropertyReader;
 
 /**
@@ -27,6 +29,7 @@ public class MainApp {
         //get the property value and print it out
         FOI = PropertyReader.getInstance().getProperties().getProperty(FOI_PROPERTY);
         ZONES = PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY).split(" ");
+        ZoneManager.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
         ProfileManager.getInstance().setAddress(PropertyReader.getInstance().getProperties().getProperty(PROFILES_URL_PROPERTY));
         ProfileManager.getInstance().setIdentifier(FOI);
         FoiController.getInstance();

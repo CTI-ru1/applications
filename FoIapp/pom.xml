@@ -155,7 +155,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <mainClass>eu.uberdust.MainApp</mainClass>
+                            <mainClass>eu.uberdust.application.foi.MainApp</mainClass>
                         </configuration>
                         <goals>
                             <goal>one-jar</goal>
