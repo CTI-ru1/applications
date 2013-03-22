@@ -24,15 +24,13 @@ public final class FoiController implements Observer {
     private static final String HTTP_PREFIX = "http://";
     private static final String WS_PREFIX = "ws://";
 
-    private static String mode = "room";//GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
+    //private static String mode = "room";//GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
 
-    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI;
+    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI;
 
-    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
-    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI + "/capabilities/json";
-
-    private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + mode + ":" + MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
+    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capabilities/json";
 
     private long lockscreenDelay;
 
@@ -115,7 +113,7 @@ public final class FoiController implements Observer {
         //PresenseManager.getInstance().addObserver(this);
         PresenceManageR.getInstance().addObserver(this);
 
-        LOGGER.info(mode);
+        LOGGER.info(MainApp.MODE);
         try {
             lockscreenDelay = Long.parseLong(ProfileManager.getInstance().getElement("lockscreen_delay")) * 1000;
         } catch (NumberFormatException npe) {
@@ -143,20 +141,20 @@ public final class FoiController implements Observer {
 
         //Subscription for notifications.
 //        String mode = ProfileManager.getInstance().getElement("mode");
-        if ("workstation".equals(mode)) {
+        if ("workstation".equals(MainApp.MODE)) {
 
             //setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
 
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
 
 
-        } else if ("room".equals(mode)) {
+        } else if ("room".equals(MainApp.MODE)) {
             //setScreenLocked(false);
             //DUPLICATE of (1) + not needed//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
 //            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
 
-        } else if ("ichatz".equals(mode)) {
+        } else if ("ichatz".equals(MainApp.MODE)) {
 
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);

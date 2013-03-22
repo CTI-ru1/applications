@@ -2,9 +2,7 @@ package eu.uberdust.application.foi;
 
 import eu.uberdust.application.foi.manager.ProfileManager;
 import eu.uberdust.application.foi.manager.ZoneManageR;
-import eu.uberdust.application.foi.manager.ZoneManager;
 import eu.uberdust.application.foi.controller.FoiController;
-import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.util.PropertyReader;
 
 /**
@@ -15,6 +13,7 @@ public class MainApp {
     private final static String ZONES_PROPERTY = "ZONES";
     private final static String PROFILES_URL_PROPERTY = "profiles.url";
     public static String FOI;
+    public static String MODE;
     public static String[] ZONES;
     public static final String CAPABILITY_LIGHT = "urn:wisebed:node:capability:light";
     public static final String CAPABILITY_PIR = "urn:wisebed:node:capability:pir";
@@ -32,9 +31,10 @@ public class MainApp {
         //get the property value and print it out
         FOI = PropertyReader.getInstance().getProperties().getProperty(FOI_PROPERTY);
         ZONES = PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY).split(" ");
-        ZoneManageR.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
         ProfileManager.getInstance().setAddress(PropertyReader.getInstance().getProperties().getProperty(PROFILES_URL_PROPERTY));
         ProfileManager.getInstance().setIdentifier(FOI);
+        MODE = ProfileManager.getInstance().getElement("mode");
+        ZoneManageR.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
         FoiController.getInstance();
 
     }
