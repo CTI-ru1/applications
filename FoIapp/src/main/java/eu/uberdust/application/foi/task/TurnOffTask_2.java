@@ -9,6 +9,8 @@ package eu.uberdust.application.foi.task;
  */
 
 import eu.uberdust.application.foi.MainApp;
+import eu.uberdust.application.foi.manager.LockManager;
+import eu.uberdust.application.foi.manager.ZoneManager;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -27,7 +29,7 @@ public class TurnOffTask_2 extends TimerTask {
 
     private final Timer timer;
 
-    private boolean isScreenLocked;
+    private int ScreenState;
 
 
     public TurnOffTask_2(final Timer thatTimer) {
@@ -38,14 +40,14 @@ public class TurnOffTask_2 extends TimerTask {
 
     @Override
     public final void run() {
-//        LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
-//
-//        isScreenLocked = FoiController.getInstance().isScreenLocked();
-//
-//        if (isScreenLocked) {
-//                LOGGER.info("TurnOffTask_2: Turn off zone " + MainApp.ZONES[0] + " " + MainApp.FOI + " " + isScreenLocked +"lockscreen_delay :"+FoiController.getInstance().getLockscreenDelay());
-//                FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
-//        }
+        LOGGER.info("TurnOffTask_2: Task to turn off Light_2 initialized");
+
+       ScreenState = LockManager.getInstance().getCurrentState();
+
+        if (ScreenState == LockManager.LOCKED) {
+                LOGGER.info("TurnOffTask_2: Turn off All lights " );
+                ZoneManager.getInstance().switchOffAll();
+        }
 
     }
 

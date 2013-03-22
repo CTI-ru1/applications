@@ -30,7 +30,7 @@ public class TurnOffTask_3 extends TimerTask {
     public final void run() {
 
         LOGGER.info("TurnOffTask_3: set flag to false");
-        FoiController.getInstance().setFlag(false);
+        //FoiController.getInstance().setFlag(false);
 
 
     }

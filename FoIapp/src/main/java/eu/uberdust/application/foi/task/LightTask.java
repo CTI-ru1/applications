@@ -1,6 +1,7 @@
 package eu.uberdust.application.foi.task;
 
-import eu.uberdust.application.foi.MainApp;
+import eu.uberdust.application.foi.manager.PresenceManageR;
+import eu.uberdust.application.foi.manager.ZoneManageR;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -31,58 +32,30 @@ public class LightTask extends TimerTask {
 
     @Override
     public final void run() {
-//        LOGGER.info("Task to turn off Lights initialized");
-//        if (FoiController.getInstance().isZone2()) {
-//            if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > DELAY) {
-//                //turn off zone 2
-//                    LOGGER.info("Turn off zone 2");
-//                if("ichatz".equals(ProfileManager.getInstance().getElement("mode"))){
-//                    if (FoiController.getInstance().isScreenLocked()) {
-//                        LOGGER.info("LightTask: Turn off zone 2");
-//                        FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
-//
-//                        //Re-schedule this timer to run in 30000ms to turn off
-//                        this.timer.schedule(new LightTask(timer), DELAY);
-//
-//                    } else{
-//                        timer.schedule(new TurnOffTask_4(timer), TurnOffTask_4.DELAY);
-//                        LOGGER.info("EXIT LightTask.");
-//                    }
-//
-//
-//                }  else {
-//                         if(MainApp.ZONES.length > 2)
-//                            { FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));}
-//                         else{
-//                             FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
-//                            }
-//
-//                        //Re-schedule this timer to run in 30000ms to turn off
-//                        this.timer.schedule(new LightTask(timer), DELAY);
-//                   }
-//            } else {
-//                //Re-schedule this timer to run in 5000ms to turn off
-//                this.timer.schedule(new LightTask(timer), DELAY / 6);
-//            }
-//        } else if (FoiController.getInstance().isZone1()) {
-//            if (System.currentTimeMillis() - FoiController.getInstance().getLastPirReading() > 30000) {
-//
-//                //turn off zone 1
-//                if("ichatz".equals(ProfileManager.getInstance().getElement("mode"))){
-//
-//                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[2]));
-//
-//                }else{
-//                    FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[0]));
-//                    if(MainApp.ZONES.length > 2){
-//                        FoiController.getInstance().controlLight(false, Integer.parseInt(MainApp.ZONES[1]));
-//                    }
-//                    LOGGER.info("Turn off zone 1");
-//                }
-//            } else {
-//                //Re-schedule this timer to run in 5000ms to turn off
-//                this.timer.schedule(new LightTask(timer), DELAY / 6);
-//            }
-//        }
+        LOGGER.info("Task to turn off Lights initialized");
+        if (ZoneManageR.getInstance().getLastStatus()) {
+            if (System.currentTimeMillis() - PresenceManageR.getInstance().getLastPirReading() > DELAY) {
+                //turn off zone 2
+                LOGGER.info("Turn off last light level");
+
+                ZoneManageR.getInstance().switchLastOff();
+
+                //Re-schedule this timer to run in 30000ms to turn off
+                this.timer.schedule(new LightTask(timer), DELAY);
+            } else {
+                //Re-schedule this timer to run in 5000ms to turn off
+                this.timer.schedule(new LightTask(timer), DELAY / 6);
+            }
+        } else if (ZoneManageR.getInstance().getFirstStatus()) {
+            if (System.currentTimeMillis() - PresenceManageR.getInstance().getLastPirReading() > 30000) {
+
+                ZoneManageR.getInstance().switchOffAll();
+
+                LOGGER.info("Turn off first light level");
+            } else {
+                //Re-schedule this timer to run in 5000ms to turn off
+                this.timer.schedule(new LightTask(timer), DELAY / 6);
+            }
+        }
     }
 }
