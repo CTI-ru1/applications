@@ -174,12 +174,12 @@ public class ZoneManageR {
             controlLight(status, getName());
         }
 
-        public void setOn() {
+        public synchronized void setOn() {
             controlLight(true, getName());
             status = true;
         }
 
-        public void setOff() {
+        public synchronized void setOff() {
             controlLight(false, getName());
             status = false;
         }
