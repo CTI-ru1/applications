@@ -116,7 +116,8 @@ public class PresenceManageR extends Observable implements Observer {
             if (reading.getDoubleReading() > 0) {
                 //update timestamps hashMap
                 timeStamps.put(reading.getNode(), reading.getTimestamp());
-                LatestPirTimestamp = Collections.min(timeStamps.values());
+                //LatestPirTimestamp = Collections.min(timeStamps.values());
+                LatestPirTimestamp = reading.getTimestamp();
                 PresenceHandler();
                 //getPirDelay();
             }
@@ -176,7 +177,7 @@ public class PresenceManageR extends Observable implements Observer {
      *
      *
      */
-    public void PresenceHandler() {
+    public synchronized void PresenceHandler() {
 
         if (!ZoneManageR.getInstance().getFirstStatus()) {
 
@@ -219,7 +220,7 @@ public class PresenceManageR extends Observable implements Observer {
 
             if (ZoneManageR.getInstance().getLastStatus()) {
 
-                if (isLongAbsence()) {
+                if (isLongAbsence(20)) {
                     //turn off zone 2
                     LOGGER.info("Turn off last light level");
 
@@ -229,7 +230,7 @@ public class PresenceManageR extends Observable implements Observer {
                     this.timer.schedule(new AbsenceHandler(timer), pirDelay);
                 } else {
                     //Re-schedule this timer to run in 5000ms to turn off
-                    this.timer.schedule(new AbsenceHandler(timer), pirDelay / 6);
+                    this.timer.schedule(new AbsenceHandler(timer), 5000);
                 }
             } else if (ZoneManageR.getInstance().getFirstStatus()) {
 
@@ -242,7 +243,7 @@ public class PresenceManageR extends Observable implements Observer {
                 } else {
                     //Re-schedule this timer to run in 5000ms to turn off
                     LOGGER.info("Timer reschedule for turning last light level off");
-                    this.timer.schedule(new AbsenceHandler(timer), pirDelay / 6);
+                    this.timer.schedule(new AbsenceHandler(timer), 5000);
                 }
             }
         }
@@ -285,9 +286,28 @@ public class PresenceManageR extends Observable implements Observer {
 
         LOGGER.info("Check for Long Absence : "+(System.currentTimeMillis() - LatestPirTimestamp)+" > "+pirDelay);
 
-       return (System.currentTimeMillis() - LatestPirTimestamp > pirDelay);  // in this case we need the most recent hashMap timestamp
+       return (System.currentTimeMillis() - LatestPirTimestamp > pirDelay);  // in this case we need the most recent (hashMap) timestamp
                                                                             // that evaluates the preceding expression to true to signify
                                                                            // long absence.
+    }
+
+    /**
+     * Checks for extended absence with custom time interval
+     *
+     * @return true/false
+     */
+    private boolean isLongAbsence(int addDelay) {
+
+        for (String host : timeStamps.keySet()) {
+
+            LOGGER.info(host + "@" + timeStamps.get(host));
+        }
+
+        LOGGER.info("Check for Long Absence : "+(System.currentTimeMillis() - LatestPirTimestamp)+" > "+(pirDelay + addDelay*1000));
+
+        return (System.currentTimeMillis() - LatestPirTimestamp > (pirDelay + addDelay*1000));  // in this case we need the most recent (hashMap) timestamp
+                                                                                                // that evaluates the preceding expression to true to signify
+                                                                                                // long absence.
     }
 
 
