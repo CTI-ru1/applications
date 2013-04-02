@@ -186,7 +186,7 @@ public class PresenceManageR extends Observable implements Observer {
 
                timer.schedule(new AbsenceHandler(timer), pirDelay);
 
-            } else if (!ZoneManageR.getInstance().getLastStatus() && currentState == NEW_ENTRY) {
+            } else if (!ZoneManageR.getInstance().getLastStatus() && currentState != EMPTY ) {
 
                 if ( isLongPresence() ) {
 
