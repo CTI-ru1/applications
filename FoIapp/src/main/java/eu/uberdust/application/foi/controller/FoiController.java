@@ -24,8 +24,6 @@ public final class FoiController implements Observer {
     private static final String HTTP_PREFIX = "http://";
     private static final String WS_PREFIX = "ws://";
 
-    //private static String mode = "room";//GetJson.getInstance().callGetJsonWebService(USER_PREFERENCES, "mode");
-
     private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI;
 
     private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
@@ -38,12 +36,6 @@ public final class FoiController implements Observer {
         return lockscreenDelay;
     }
 
-    private long pirDelay;
-
-    public long getPirDelay() {
-        return pirDelay;
-    }
-
     /**
      * Pir timer.
      */
@@ -53,12 +45,6 @@ public final class FoiController implements Observer {
      * static instance(ourInstance) initialized as null.
      */
     private static FoiController ourInstance = null;
-
-    private double lumThreshold1;
-
-    private double lumThreshold2;
-
-    private long zone1TurnedOnTimestamp;
 
 
     private String uberdustUrl;
@@ -78,25 +64,6 @@ public final class FoiController implements Observer {
         return ourInstance;
     }
 
-    private void updateLum1Threshold() {
-        try {
-            lumThreshold1 = Double.parseDouble(ProfileManager.getInstance().getElement("illumination"));  //350
-        } catch (NullPointerException npe) {
-            lumThreshold1 = 350;
-        } catch (NumberFormatException nfe) {
-            lumThreshold1 = 350;
-        }
-    }
-
-    private void updateLum2Threshold() {
-        try {
-            lumThreshold2 = Double.parseDouble(ProfileManager.getInstance().getElement("illumination2"));  //350
-        } catch (NullPointerException npe) {
-            lumThreshold2 = 350;
-        } catch (NumberFormatException nfe) {
-            lumThreshold2 = 350;
-        }
-    }
 
     /**
      * Private constructor suppresses generation of a (public) default constructor.
@@ -105,31 +72,21 @@ public final class FoiController implements Observer {
 
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
         LOGGER.info("FOI Controller initializing...");
-        //mode = ProfileManager.getInstance().getElement("mode");
 
         timer = new Timer();
 
-        LockManager.getInstance().addObserver(this);
-        //PresenseManager.getInstance().addObserver(this);
-        PresenceManageR.getInstance().addObserver(this);
-
         LOGGER.info(MainApp.MODE);
+
         try {
             lockscreenDelay = Long.parseLong(ProfileManager.getInstance().getElement("lockscreen_delay")) * 1000;
         } catch (NumberFormatException npe) {
             lockscreenDelay = 1000;
         }
-        try {
-            pirDelay = Long.parseLong(ProfileManager.getInstance().getElement("pir_delay")) * 1000;
-        } catch (NumberFormatException npe) {
-            pirDelay = 1000;
-        }
-        updateLum1Threshold();
-        updateLum2Threshold();
 
 
         String uberdustUrl = PropertyReader.getInstance().getProperties().getProperty("uberdust.url") != null ?
                 PropertyReader.getInstance().getProperties().getProperty("uberdust.url") : "uberdust.cti.gr:80";
+
         uberdustUrl = uberdustUrl.replaceAll(HTTP_PREFIX, "");
 
         UberdustClient.setUberdustURL(HTTP_PREFIX + uberdustUrl);
@@ -139,20 +96,33 @@ public final class FoiController implements Observer {
         WSReadingsClient.getInstance().setServerUrl(WS_PREFIX + uberdustUrl + "/readings.ws");
 
 
-        //Subscription for notifications.
-//        String mode = ProfileManager.getInstance().getElement("mode");
         if ("workstation".equals(MainApp.MODE)) {
 
-            //setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1) || (Double.valueOf(RestClient.getInstance().callRestfulWebService(HTTP_PREFIX + uberdustUrl + SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
+            //Subscription for notifications.
+            LockManager.getInstance().addObserver(this);
+            LuminosityManager.getInstance().addObserver(this);
 
+
+            // subscribe to specific readings
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
+
+            //Adding Observer for the last readings
+            WSReadingsClient.getInstance().addObserver(LockManager.getInstance());
+            WSReadingsClient.getInstance().addObserver(LuminosityManager.getInstance());
 
 
         } else if ("room".equals(MainApp.MODE)) {
-            //setScreenLocked(false);
-            //DUPLICATE of (1) + not needed//setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
+
+            PresenceManageR.getInstance().addObserver(this);
+
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
+
 //            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
+
+            //Adding Observer for the last readings
+
+            WSReadingsClient.getInstance().addObserver(PresenceManageR.getInstance());
 
         } else if ("ichatz".equals(MainApp.MODE)) {
 
@@ -161,20 +131,29 @@ public final class FoiController implements Observer {
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);                           //"urn:wisebed:ctitestbed:virtual:room:0.I.2"
 
         }
-        //Adding Observer for the last readings
 
-        //WSReadingsClient.getInstance().addObserver(PresenseManager.getInstance());
-        WSReadingsClient.getInstance().addObserver(PresenceManageR.getInstance());
-        WSReadingsClient.getInstance().addObserver(LockManager.getInstance());
+
         LOGGER.info("FOIController Initialized");
 
     }
 
 
+    public void WorkstationHandler(){
+
+        if(LockManager.getInstance().getCurrentState() == LockManager.LOCKED || LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT)
+        {
+            //ZoneManager.getInstance().switchOffAll();
+            timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
 
 
-    public static void main(final String[] args) {
-        FoiController.getInstance();
+        } else if (LockManager.getInstance().getCurrentState() == LockManager.UNLOCKED &&
+                    (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY || LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS )){
+
+            ZoneManageR.getInstance().switchOnFirst();
+
+        }
+
+
     }
 
 
@@ -185,17 +164,7 @@ public final class FoiController implements Observer {
 
         if (o instanceof LockManager) {
 
-            if(LockManager.getInstance().getCurrentState() == LockManager.LOCKED)
-            {
-                //ZoneManager.getInstance().switchOffAll();
-                timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
-
-
-            } else if (LockManager.getInstance().getCurrentState() == LockManager.UNLOCKED){
-
-                ZoneManager.getInstance().switchOnFirst();
-
-            }
+            WorkstationHandler();
 
         }else if(o instanceof PresenceManageR){
 
@@ -214,6 +183,19 @@ public final class FoiController implements Observer {
                     break;
             }
 
+        }else if(o instanceof LuminosityManager){
+
+            WorkstationHandler();
+
+
         }
     }
+
+
+
+    public static void main(final String[] args) {
+        FoiController.getInstance();
+    }
+
+
 }

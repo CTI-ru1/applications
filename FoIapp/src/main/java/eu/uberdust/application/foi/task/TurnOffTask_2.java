@@ -8,9 +8,9 @@ package eu.uberdust.application.foi.task;
  * To change this template use File | Settings | File Templates.
  */
 
-import eu.uberdust.application.foi.MainApp;
+
 import eu.uberdust.application.foi.manager.LockManager;
-import eu.uberdust.application.foi.manager.ZoneManager;
+import eu.uberdust.application.foi.manager.ZoneManageR;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -46,7 +46,7 @@ public class TurnOffTask_2 extends TimerTask {
 
         if (ScreenState == LockManager.LOCKED) {
                 LOGGER.info("TurnOffTask_2: Turn off All lights " );
-                ZoneManager.getInstance().switchOffAll();
+                ZoneManageR.getInstance().switchOffAll();
         }
 
     }

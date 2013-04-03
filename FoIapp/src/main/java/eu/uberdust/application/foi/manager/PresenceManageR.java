@@ -87,6 +87,7 @@ public class PresenceManageR extends Observable implements Observer {
     public PresenceManageR() {
         reset();
         timer = new Timer();
+        LOGGER.info("-----PresenceManageR initializing------");
         LOGGER.info("PirDelay:" + pirDelay);
     }
 
