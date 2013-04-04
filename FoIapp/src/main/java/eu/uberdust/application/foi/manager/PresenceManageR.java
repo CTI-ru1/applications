@@ -63,6 +63,10 @@ public class PresenceManageR extends Observable implements Observer {
      */
     private final Timer timer;
 
+    private boolean newEntryFlag;
+
+    private boolean OccupiedFlag;
+
     /**
      * Returns the current state of the operation.
      *
@@ -85,9 +89,9 @@ public class PresenceManageR extends Observable implements Observer {
      * Default Constructor.
      */
     public PresenceManageR() {
+        LOGGER.info("-----PresenceManageR initializing------");
         reset();
         timer = new Timer();
-        LOGGER.info("-----PresenceManageR initializing------");
         LOGGER.info("PirDelay:" + pirDelay);
     }
 
@@ -180,18 +184,22 @@ public class PresenceManageR extends Observable implements Observer {
      */
     public synchronized void PresenceHandler() {
 
-        if (!ZoneManageR.getInstance().getFirstStatus()) {
+        if (!newEntryFlag) {   ///!RoomZoneManager.getInstance().getFirstStatus()
 
                setCurrentState(NEW_ENTRY);
                firstTimestamp = LatestPirTimestamp;
 
+               newEntryFlag = true;
+
                timer.schedule(new AbsenceHandler(timer), pirDelay);
 
-            } else if (!ZoneManageR.getInstance().getLastStatus() && currentState != EMPTY ) {
+            } else if ( !OccupiedFlag && currentState != EMPTY ) {  ///!RoomZoneManager.getInstance().getLastStatus()
 
                 if ( isLongPresence() ) {
 
                     setCurrentState(OCCUPIED);
+
+                    OccupiedFlag = true;
 
                 }
             }
@@ -217,7 +225,7 @@ public class PresenceManageR extends Observable implements Observer {
 
             LOGGER.info("AbsenceHandler initialized");
 
-            if (ZoneManageR.getInstance().getLastStatus()) {
+            if (OccupiedFlag) {   //RoomZoneManager.getInstance().getLastStatus()
 
                 if (isLongAbsence(20)) {
                     //turn off zone 2
@@ -225,19 +233,23 @@ public class PresenceManageR extends Observable implements Observer {
 
                     setCurrentState(LEFT);
 
+                    OccupiedFlag = false;
+
                     //Re-schedule this timer to run in 30000ms to turn off
                     this.timer.schedule(new AbsenceHandler(timer), pirDelay);
                 } else {
                     //Re-schedule this timer to run in 5000ms to turn off
                     this.timer.schedule(new AbsenceHandler(timer), 5000);
                 }
-            } else if (ZoneManageR.getInstance().getFirstStatus()) {
+            } else if (newEntryFlag) {                  //RoomZoneManager.getInstance().getFirstStatus()
 
                 if (isLongAbsence()) {
 
                     LOGGER.info("Turn off all lights");
 
                     setCurrentState(EMPTY);
+
+                    newEntryFlag = false;
 
                 } else {
                     //Re-schedule this timer to run in 5000ms to turn off
@@ -348,6 +360,8 @@ public class PresenceManageR extends Observable implements Observer {
         this.timeStamps = new HashMap<String, Long>();
         setCurrentState(EMPTY);
         firstTimestamp = System.currentTimeMillis();
+        newEntryFlag = false;
+        OccupiedFlag = false;
         getPirDelay();
     }
 }
