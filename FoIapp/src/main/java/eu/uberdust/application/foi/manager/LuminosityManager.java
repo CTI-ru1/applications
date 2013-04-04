@@ -71,7 +71,12 @@ public class LuminosityManager extends Observable implements Observer {
 
     }
 
-
+    public void initLum() {
+        for (int k = 0; k <= WINDOW - 1; k++) {
+            luminosityReadings.add(0.0);
+            LOGGER.info(luminosityReadings.toString());
+        }
+    }
 
 
     /**
@@ -81,25 +86,7 @@ public class LuminosityManager extends Observable implements Observer {
      */
 
     public int setCurrentState() {
-        //FSM
-        //BRIGHT-->DARKLY-->TOTAL_DARKNESS
 
-        if ( lumThreshold1 < LatestLightReading && LatestLightReading < lumThreshold2 ) {
-
-            currentState = DARKLY;
-            LOGGER.info("DARKLY");
-
-        } else if(LatestLightReading < lumThreshold2) {
-
-            currentState = TOTAL_DARKNESS;
-            LOGGER.info("TOTAL_DARKNESS");
-
-        } else if(LatestLightReading > lumThreshold1){
-
-            currentState = BRIGHT;
-            LOGGER.info("BRIGHT");
-
-        }
         this.setChanged();
         this.notifyObservers();
         return currentState;
@@ -109,8 +96,8 @@ public class LuminosityManager extends Observable implements Observer {
      * Default Constructor.
      */
     public LuminosityManager() {
-        reset();
         LOGGER.info("-----LuminosityManager initializing------");
+        reset();
     }
 
     /**
@@ -148,8 +135,82 @@ public class LuminosityManager extends Observable implements Observer {
             updateLum1Threshold();
             updateLum2Threshold();
 
-            setCurrentState();
+            updateStatus();
         }
+    }
+
+    /**
+     * Checks for the Status of lockScreen in a FOI.
+     *
+     * @return true if the FOIs screen is locked , false if unlocked
+     */
+    private void updateStatus() {
+
+        //FSM
+        //BRIGHT-->DARKLY-->TOTAL_DARKNESS
+
+        if ( lumThreshold1 < LatestLightReading && LatestLightReading < lumThreshold2 ) {
+
+            setCurrentState(DARKLY);
+
+        } else if(LatestLightReading < lumThreshold2) {
+
+            setCurrentState(TOTAL_DARKNESS);
+
+        } else if(LatestLightReading > lumThreshold1){
+
+            setCurrentState(BRIGHT);
+
+        }
+
+
+    }
+
+
+    /**
+     * Updates and Returns the current state of the operation.
+     *
+     * @return {SCREEN_LOCKED , UNOLOKED}
+     */
+
+    public void setCurrentState(int newState) {
+
+        LOGGER.info("Setting next state: "+stateToString(currentState)+" -------->> "+stateToString(newState));
+
+        currentState = newState;
+
+        this.setChanged();
+        this.notifyObservers();
+
+    }
+
+
+    /**
+     * Converts int state value to string.
+     *
+     * @param state the new state.
+     */
+    public String stateToString(int state){
+
+        String s = "";
+
+        switch (state){
+
+            case 1:
+                s = "DARKLY";
+                break;
+
+            case 2:
+                s = "TOTAL_DARKNESS";
+                break;
+
+            case 3:
+                s = "BRIGHT";
+                break;
+        }
+
+        return s;
+
     }
 
 
@@ -199,9 +260,10 @@ public class LuminosityManager extends Observable implements Observer {
      */
     public void reset() {
         this.states = new HashMap<String, Double>();
+        initLum();
         updateLum1Threshold();
         updateLum2Threshold();
-        currentState = TOTAL_DARKNESS;
+        setCurrentState(TOTAL_DARKNESS);
 
     }
 }
