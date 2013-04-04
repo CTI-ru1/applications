@@ -109,6 +109,15 @@ public class WorkstationZoneManager {
     }
 
     /**
+     * Switches off the first Light-Level.
+     */
+    public void switchOffFirst() {
+
+        zones.get(0).setOff();
+
+    }
+
+    /**
      * Switches on the first Light-Level.
      */
     public void switchOnFirst() {
