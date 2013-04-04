@@ -26,7 +26,7 @@ public final class FoiController implements Observer {
 
     private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI;
 
-    private static final String SENSOR_SCREENLOCK_REST = "/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+    private static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
 
     private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capabilities/json";
 
@@ -140,17 +140,24 @@ public final class FoiController implements Observer {
 
     public void WorkstationHandler(){
 
-        if(LockManager.getInstance().getCurrentState() == LockManager.LOCKED || LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT)
-        {
-            //ZoneManager.getInstance().switchOffAll();
-            timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
+        if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
 
+            if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {     //Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2
 
-        } else if (LockManager.getInstance().getCurrentState() == LockManager.UNLOCKED &&
-                    (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY || LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS )){
+                WorkstationZoneManager.getInstance().switchOnFirst();
 
-            ZoneManageR.getInstance().switchOnFirst();
+            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS) {   //Median < LUM_THRESHOLD_2
 
+                WorkstationZoneManager.getInstance().switchOnAll();
+
+            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT) {                //Median > LUM_THRESHOLD_1
+
+                WorkstationZoneManager.getInstance().switchOffAll();
+
+            }
+        } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+                timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
+                WorkstationZoneManager.getInstance().switchOnFirst();
         }
 
 
@@ -170,16 +177,16 @@ public final class FoiController implements Observer {
 
             switch (PresenceManageR.getInstance().getCurrentState()) {
                 case PresenceManageR.EMPTY:
-                    ZoneManageR.getInstance().switchOffAll();
+                    RoomZoneManager.getInstance().switchOffAll();
                     break;
                 case PresenceManageR.LEFT:
-                    ZoneManageR.getInstance().switchLastOff();
+                    RoomZoneManager.getInstance().switchLastOff();
                     break;
                 case PresenceManageR.NEW_ENTRY:
-                    ZoneManageR.getInstance().switchOnFirst();
+                    RoomZoneManager.getInstance().switchOnFirst();
                     break;
                 case PresenceManageR.OCCUPIED:
-                    ZoneManageR.getInstance().switchOnAll();
+                    RoomZoneManager.getInstance().switchOnAll();
                     break;
             }
 
