@@ -12,18 +12,18 @@ import java.util.List;
 
 
 
-public class ZoneManageR {
+public class RoomZoneManager {
 
     private static final String ACTUATOR_URL = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:node:capability:lz" + MainApp.ZONES[0] + "/json/limit/1";
 
     /**
      * Static Logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(ZoneManageR.class);
+    private static final Logger LOGGER = Logger.getLogger(RoomZoneManager.class);
     /**
      * Singleton instance.
      */
-    private static ZoneManageR ourInstance = new ZoneManageR();
+    private static RoomZoneManager ourInstance = new RoomZoneManager();
     /**
      * Stores all available and controllable zones.
      */
@@ -34,7 +34,7 @@ public class ZoneManageR {
      *
      * @return the single instance.
      */
-    public static ZoneManageR getInstance() {
+    public static RoomZoneManager getInstance() {
         return ourInstance;
     }
 
@@ -43,7 +43,7 @@ public class ZoneManageR {
     /**
      * Default Constructor.
      */
-    private ZoneManageR() {
+    private RoomZoneManager() {
     }
 
     /**
@@ -88,7 +88,7 @@ public class ZoneManageR {
      */
     public boolean getFirstStatus() {
 
-        if ("room".equals(MainApp.MODE) && zones.size() > 1) {
+        if (zones.size() > 2) {
 
             return zones.get(0).getStatus() && zones.get(1).getStatus();
         }
@@ -120,7 +120,7 @@ public class ZoneManageR {
      */
     public void switchOnFirst() {
 
-        if ("room".equals(MainApp.MODE) && zones.size() > 1) {
+        if (zones.size() > 2) {
             zones.get(0).setOn();
             zones.get(1).setOn();
         }
