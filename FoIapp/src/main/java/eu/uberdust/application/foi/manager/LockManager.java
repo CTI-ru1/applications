@@ -1,6 +1,9 @@
 package eu.uberdust.application.foi.manager;
 
+import eu.uberdust.application.foi.MainApp;
+import eu.uberdust.application.foi.util.GetJson;
 import eu.uberdust.communication.protobuf.Message;
+import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
 import org.apache.log4j.Logger;
 
@@ -28,20 +31,38 @@ public class LockManager extends Observable implements Observer {
     private static LockManager instance = null;
 
     /**
-     * LOCKED State Indicator.
+     * SCREEN_UNLOCKED State Indicator.
      */
-    public static final int LOCKED = 1;
+    public static final int SCREEN_UNLOCKED = 0;
 
     /**
-     * UNLOCKED State Indicator.
+     * SCREEN_LOCKED State Indicator.
      */
-    public static final int UNLOCKED = 2;
+    public static final int SCREEN_LOCKED = 1;
+
+    /**
+     * WORKSTATION_START_SESSION State Indicator.
+     */
+    public static final int WORKSTATION_START_SESSION = 2;
+
+    /**
+     * POWER_OFF State Indicator.
+     */
+    public static final int WORKSTATION_END_SESSION = 3;
 
 
     /**
      * Current State of the Presence Monitor.
      */
     private int currentState;
+
+
+    private static final String SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
+
+    private static final String SCREENLOCK_NODE = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/json/limit/1";
+
+
+
 
 
     public int getCurrentState() {
@@ -51,39 +72,64 @@ public class LockManager extends Observable implements Observer {
     }
 
 
+    /**
+     * Converts int state value to string.
+     *
+     * @param state the new state.
+     */
+    public String stateToString(int state){
+
+        String s = "";
+
+        switch (state){
+
+            case 0:
+                s = "SCREEN_UNLOCKED";
+                break;
+
+            case 1:
+                s = "SCREEN_LOCKED";
+                break;
+
+            case 2:
+                s = "WORKSTATION_START_SESSION";
+                break;
+
+            case 3:
+                s = "WORKSTATION_END_SESSION";
+                break;
+        }
+
+        return s;
+
+    }
 
 
     /**
      * Updates and Returns the current state of the operation.
      *
-     * @return {LOCKED , UNOLOKED}
+     * @return {SCREEN_LOCKED , UNOLOKED}
      */
 
-    public int setCurrentState() {
-        //FSM
-        //LOCKED -> UNLOCKED -> LOCKED
-        if (updateStatus()) {//true when locked now
+    public void setCurrentState(int newState) {
 
-            currentState = LOCKED;
-            LOGGER.info("SCREEN_LOCKED");
+        LOGGER.info("Setting next state: "+stateToString(currentState)+" -------->> "+stateToString(newState));
 
-        } else {
+        currentState = newState;
 
-            currentState = UNLOCKED;
-            LOGGER.info("SCREEN_UNLOCKED");
-
-        }
         this.setChanged();
         this.notifyObservers();
-        return currentState;
+
     }
 
     /**
      * Default Constructor.
      */
     public LockManager() {
-        reset();
+
         LOGGER.info("-----LockManager initializing------");
+        reset();
+
     }
 
     /**
@@ -116,7 +162,7 @@ public class LockManager extends Observable implements Observer {
             states.put(reading.getNode(), reading.getDoubleReading());
 
             //calculate te current Status FSM
-            setCurrentState();
+            updateStatus();
         }
     }
 
@@ -125,20 +171,32 @@ public class LockManager extends Observable implements Observer {
      *
      * @return true if the FOIs screen is locked , false if unlocked
      */
-    private boolean updateStatus() {
+    private void updateStatus() {
 
         for (String point : states.keySet()) {
             LOGGER.info(point + "@" + states.get(point));
         }
 
-        for (String host : states.keySet()) {
 
-            if ( states.get(host) == 0.0 ) {
-                return false;
+        for (String host : states.keySet()) {         // only one entry for now
+
+            switch ( (states.get(host)).intValue()){
+                case 0:
+                    setCurrentState(SCREEN_UNLOCKED);
+                    break;
+                case 1:
+                    setCurrentState(SCREEN_LOCKED);
+                    break;
+                case 2:
+                    setCurrentState(WORKSTATION_START_SESSION);
+                    break;
+                case 3:
+                    setCurrentState(WORKSTATION_END_SESSION);
+                    break;
+
             }
-        }
 
-        return true;
+        }
     }
 
 
@@ -165,7 +223,8 @@ public class LockManager extends Observable implements Observer {
      */
     public void reset() {
         this.states = new HashMap<String, Double>();
-        currentState = LOCKED;
+        states.put(GetJson.getInstance().callGetJsonWebService(SCREENLOCK_NODE,"nodeId"), Double.valueOf(RestClient.getInstance().callRestfulWebService(this.SCREENLOCK_REST).split("\t")[1]));
+        updateStatus();
 
     }
 }
