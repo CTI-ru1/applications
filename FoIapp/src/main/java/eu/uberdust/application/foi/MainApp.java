@@ -1,7 +1,7 @@
 package eu.uberdust.application.foi;
 
 import eu.uberdust.application.foi.manager.ProfileManager;
-import eu.uberdust.application.foi.manager.ZoneManageR;
+import eu.uberdust.application.foi.manager.RoomZoneManager;
 import eu.uberdust.application.foi.controller.FoiController;
 import eu.uberdust.util.PropertyReader;
 
@@ -34,7 +34,7 @@ public class MainApp {
         ProfileManager.getInstance().setAddress(PropertyReader.getInstance().getProperties().getProperty(PROFILES_URL_PROPERTY));
         ProfileManager.getInstance().setIdentifier(FOI);
         MODE = ProfileManager.getInstance().getElement("mode");
-        ZoneManageR.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
+        RoomZoneManager.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
         FoiController.getInstance();
 
     }
