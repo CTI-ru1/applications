@@ -10,7 +10,7 @@ package eu.uberdust.application.foi.task;
 
 
 import eu.uberdust.application.foi.manager.LockManager;
-import eu.uberdust.application.foi.manager.ZoneManageR;
+import eu.uberdust.application.foi.manager.RoomZoneManager;
 import org.apache.log4j.Logger;
 
 import java.util.Timer;
@@ -44,9 +44,9 @@ public class TurnOffTask_2 extends TimerTask {
 
        ScreenState = LockManager.getInstance().getCurrentState();
 
-        if (ScreenState == LockManager.LOCKED) {
+        if (ScreenState == LockManager.SCREEN_LOCKED) {
                 LOGGER.info("TurnOffTask_2: Turn off All lights " );
-                ZoneManageR.getInstance().switchOffAll();
+                RoomZoneManager.getInstance().switchOffAll();
         }
 
     }
