@@ -124,7 +124,7 @@ public class PresenceManageR extends Observable implements Observer {
                 //LatestPirTimestamp = Collections.min(timeStamps.values());
                 LatestPirTimestamp = reading.getTimestamp();
                 PresenceHandler();
-                //getPirDelay();
+                getPirDelay();
             }
         }
     }

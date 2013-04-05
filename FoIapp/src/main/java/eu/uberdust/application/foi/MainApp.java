@@ -3,6 +3,7 @@ package eu.uberdust.application.foi;
 import eu.uberdust.application.foi.manager.ProfileManager;
 import eu.uberdust.application.foi.manager.RoomZoneManager;
 import eu.uberdust.application.foi.controller.FoiController;
+import eu.uberdust.application.foi.manager.WorkstationZoneManager;
 import eu.uberdust.util.PropertyReader;
 
 /**
@@ -14,6 +15,7 @@ public class MainApp {
     private final static String PROFILES_URL_PROPERTY = "profiles.url";
     public static String FOI;
     public static String MODE;
+    public static String ACTUATOR_MODE;
     public static String[] ZONES;
     public static final String CAPABILITY_LIGHT = "urn:wisebed:node:capability:light";
     public static final String CAPABILITY_PIR = "urn:wisebed:node:capability:pir";
@@ -34,7 +36,15 @@ public class MainApp {
         ProfileManager.getInstance().setAddress(PropertyReader.getInstance().getProperties().getProperty(PROFILES_URL_PROPERTY));
         ProfileManager.getInstance().setIdentifier(FOI);
         MODE = ProfileManager.getInstance().getElement("mode");
+
+        if( MODE.equals("ichatzWorkstation") || MODE.equals("SingleLightWorkstation") ){
+
+            ACTUATOR_MODE = "workstation";
+
+        }  else  ACTUATOR_MODE = "room";
+
         RoomZoneManager.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
+        WorkstationZoneManager.getInstance().setZones(PropertyReader.getInstance().getProperties().getProperty(ZONES_PROPERTY));
         FoiController.getInstance();
 
     }

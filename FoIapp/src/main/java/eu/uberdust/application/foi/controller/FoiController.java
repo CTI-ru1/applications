@@ -24,11 +24,9 @@ public final class FoiController implements Observer {
     private static final String HTTP_PREFIX = "http://";
     private static final String WS_PREFIX = "ws://";
 
-    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI;
+    private static final String URN_FOI = "urn:wisebed:ctitestbed:virtual:" + MainApp.ACTUATOR_MODE + ":" + MainApp.FOI;
 
-    private static final String SENSOR_SCREENLOCK_REST = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capability/urn:wisebed:ctitestbed:node:capability:lockScreen/tabdelimited/limit/1";
-
-    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.MODE + ":" + MainApp.FOI + "/capabilities/json";
+    private static final String FOI_CAPABILITIES = "http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:virtual:" + MainApp.ACTUATOR_MODE + ":" + MainApp.FOI + "/capabilities/json";
 
     private long lockscreenDelay;
 
@@ -96,7 +94,7 @@ public final class FoiController implements Observer {
         WSReadingsClient.getInstance().setServerUrl(WS_PREFIX + uberdustUrl + "/readings.ws");
 
 
-        if ("workstation".equals(MainApp.MODE)) {
+        if ("SingleLightWorkstation".equals(MainApp.MODE)) {
 
             //Subscription for notifications.
             LockManager.getInstance().addObserver(this);
@@ -112,11 +110,11 @@ public final class FoiController implements Observer {
             WSReadingsClient.getInstance().addObserver(LuminosityManager.getInstance());
 
 
-        } else if ("room".equals(MainApp.MODE)) {
+        } else if ("PublicRoom".equals(MainApp.MODE)) {
 
             PresenceManageR.getInstance().addObserver(this);
 
-            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);               //this.URN_FOI
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);
 
 //            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
 
@@ -124,11 +122,23 @@ public final class FoiController implements Observer {
 
             WSReadingsClient.getInstance().addObserver(PresenceManageR.getInstance());
 
-        } else if ("ichatz".equals(MainApp.MODE)) {
+        } else if ("ichatzWorkstation".equals(MainApp.MODE) || "ichatzRoom".equals(MainApp.MODE)) {
 
+            //Subscription for notifications.
+            LockManager.getInstance().addObserver(this);
+            LuminosityManager.getInstance().addObserver(this);
+            PresenceManageR.getInstance().addObserver(this);
+
+
+            // subscribe to specific readings
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_SCREENLOCK);
             WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_LIGHT);
-            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);                           //"urn:wisebed:ctitestbed:virtual:room:0.I.2"
+            WSReadingsClient.getInstance().subscribe(URN_FOI, MainApp.CAPABILITY_PIR);
+
+            //Adding Observer for the last readings
+            WSReadingsClient.getInstance().addObserver(LockManager.getInstance());
+            WSReadingsClient.getInstance().addObserver(LuminosityManager.getInstance());
+            WSReadingsClient.getInstance().addObserver(PresenceManageR.getInstance());
 
         }
 
@@ -140,11 +150,13 @@ public final class FoiController implements Observer {
 
     public void WorkstationHandler(){
 
+
         if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
 
             if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {     //Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2
 
                 WorkstationZoneManager.getInstance().switchOnFirst();
+                WorkstationZoneManager.getInstance().switchLastOff();
 
             } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS) {   //Median < LUM_THRESHOLD_2
 
@@ -156,11 +168,138 @@ public final class FoiController implements Observer {
 
             }
         } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+
+            if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS){
+
                 timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
-                WorkstationZoneManager.getInstance().switchOnFirst();
+                WorkstationZoneManager.getInstance().switchOffFirst();
+
+            }else if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY){
+
+                timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
+
+            }
         }
 
 
+    }
+
+
+    public void ichatzWorkstationHandler(){
+
+        if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
+
+            if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {     //Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2
+
+                WorkstationZoneManager.getInstance().switchOnFirst();
+                WorkstationZoneManager.getInstance().switchLastOff();
+
+            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS) {   //Median < LUM_THRESHOLD_2
+
+                WorkstationZoneManager.getInstance().switchOnAll();
+
+            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT) {                //Median > LUM_THRESHOLD_1
+
+                WorkstationZoneManager.getInstance().switchOffAll();
+
+            }
+        } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+
+            if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS){
+
+                if(PresenceManageR.getInstance().getCurrentState() == PresenceManageR.EMPTY){
+
+                    timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
+
+                }
+
+                WorkstationZoneManager.getInstance().switchOffFirst();
+
+            }else if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY){
+
+                    timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
+
+            }
+        }
+
+
+    }
+
+
+    public void PublicRoomHandler(){
+
+        switch (PresenceManageR.getInstance().getCurrentState()) {
+            case PresenceManageR.EMPTY:
+                RoomZoneManager.getInstance().switchOffAll();
+                break;
+            case PresenceManageR.LEFT:
+                RoomZoneManager.getInstance().switchLastOff();
+                break;
+            case PresenceManageR.NEW_ENTRY:
+                RoomZoneManager.getInstance().switchOnFirst();
+                break;
+            case PresenceManageR.OCCUPIED:
+                RoomZoneManager.getInstance().switchOnAll();
+                break;
+        }
+
+
+    }
+
+
+    public void SingleLightPir() {
+
+        switch (PresenceManageR.getInstance().getCurrentState()) {
+            case PresenceManageR.EMPTY:
+                WorkstationZoneManager.getInstance().switchLastOff();
+                break;
+            case PresenceManageR.OCCUPIED:
+                WorkstationZoneManager.getInstance().switchOnLast();
+                break;
+        }
+
+    }
+
+    public  void ichatzPresenceHandler() {
+
+        if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT) {
+
+            WorkstationZoneManager.getInstance().switchOffAll();
+
+        } else {
+
+            if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
+
+                if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY){
+
+
+
+                    WorkstationZoneManager.getInstance().switchOffFirst();
+
+                }
+
+                SingleLightPir();
+
+            } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+
+                switch (PresenceManageR.getInstance().getCurrentState()) {
+                    case PresenceManageR.EMPTY:
+                        WorkstationZoneManager.getInstance().switchOffAll();
+                        break;
+                    case PresenceManageR.LEFT:
+                        WorkstationZoneManager.getInstance().switchLastOff();
+                        break;
+                    case PresenceManageR.NEW_ENTRY:
+                        WorkstationZoneManager.getInstance().switchOnFirst();
+                        break;
+                    case PresenceManageR.OCCUPIED:
+                        WorkstationZoneManager.getInstance().switchOnAll();
+                        break;
+                }
+
+            }
+
+        }
     }
 
 
@@ -171,33 +310,44 @@ public final class FoiController implements Observer {
 
         if (o instanceof LockManager) {
 
-            WorkstationHandler();
+            if(MainApp.MODE.equals("SingleLightWorkstation")){
+
+                WorkstationHandler();
+
+            }else if(MainApp.MODE.equals("ichatzRoom")){
+
+                ichatzPresenceHandler();
+            }
 
         }else if(o instanceof PresenceManageR){
 
-            switch (PresenceManageR.getInstance().getCurrentState()) {
-                case PresenceManageR.EMPTY:
-                    RoomZoneManager.getInstance().switchOffAll();
-                    break;
-                case PresenceManageR.LEFT:
-                    RoomZoneManager.getInstance().switchLastOff();
-                    break;
-                case PresenceManageR.NEW_ENTRY:
-                    RoomZoneManager.getInstance().switchOnFirst();
-                    break;
-                case PresenceManageR.OCCUPIED:
-                    RoomZoneManager.getInstance().switchOnAll();
-                    break;
+            if(MainApp.MODE.equals("PublicRoom")){
+
+                PublicRoomHandler();
+
+            } else if(MainApp.MODE.equals("ichatzRoom")){
+
+                ichatzPresenceHandler();
             }
+
 
         }else if(o instanceof LuminosityManager){
 
-            WorkstationHandler();
+            if(MainApp.MODE.equals("SingleLightWorkstation")){
 
+                WorkstationHandler();
+
+            }else if(MainApp.MODE.equals("ichatzRoom")){
+
+                ichatzPresenceHandler();
+
+            } else if(MainApp.MODE.equals("ichatzWorkstation")){
+
+                ichatzWorkstationHandler();
+            }
 
         }
     }
-
 
 
     public static void main(final String[] args) {
