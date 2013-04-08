@@ -91,6 +91,18 @@ public class WorkstationZoneManager {
     }
 
     /**
+     * Returns true if there is only one zone available
+     */
+    public boolean isSingleZone() {
+
+        if(zones.size() > 1)
+            return true;
+        else return false;
+
+
+    }
+
+    /**
      * Returns the status of last light level
      */
     public boolean getLastStatus() {
@@ -104,7 +116,11 @@ public class WorkstationZoneManager {
      */
     public void switchLastOff() {
 
-        zones.get(zones.size()-1).setOff();
+      if(zones.size() > 1)
+
+            zones.get(zones.size()-1).setOff();
+
+        else switchOffFirst();
 
     }
 
@@ -131,7 +147,11 @@ public class WorkstationZoneManager {
      */
     public void switchOnLast() {
 
-        zones.get(1).setOn();
+        if(zones.size() > 1)
+
+            zones.get(zones.size()-1).setOn();
+
+        else switchOnFirst();
 
     }
 

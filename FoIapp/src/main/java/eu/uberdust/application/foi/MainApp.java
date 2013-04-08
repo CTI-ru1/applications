@@ -37,7 +37,7 @@ public class MainApp {
         ProfileManager.getInstance().setIdentifier(FOI);
         MODE = ProfileManager.getInstance().getElement("mode");
 
-        if( MODE.equals("ichatzWorkstation") || MODE.equals("SingleLightWorkstation") ){
+        if( MODE.equals("ichatzWorkstation") || MODE.equals("Workstation") ){
 
             ACTUATOR_MODE = "workstation";
 
