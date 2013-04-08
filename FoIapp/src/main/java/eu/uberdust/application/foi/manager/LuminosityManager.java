@@ -15,11 +15,6 @@ public class LuminosityManager extends Observable implements Observer {
     private static final Logger LOGGER = Logger.getLogger(LuminosityManager.class);
 
     /**
-     * Contains all States for all known sensors.
-     */
-    private Map<String, Double> states;
-
-    /**
      * Our Instance.
      */
     private static LuminosityManager instance = null;
@@ -46,12 +41,12 @@ public class LuminosityManager extends Observable implements Observer {
     private int currentState;
 
     /**
-     * First Luminosity Threshold
+     * Lower Luminosity Threshold        200
      */
     private double lumThreshold1;
 
     /**
-     * Second Luminosity Threshold
+     * Higher Luminosity Threshold       350
      */
     private double lumThreshold2;
 
@@ -63,6 +58,8 @@ public class LuminosityManager extends Observable implements Observer {
     public static final int WINDOW = 10;
 
     public static Queue luminosityReadings = new PriorityQueue(WINDOW);
+
+    private double Median;
 
 
     public int getCurrentState() {
@@ -79,18 +76,6 @@ public class LuminosityManager extends Observable implements Observer {
     }
 
 
-    /**
-     * Updates and Returns the current state of the operation.
-     *
-     * @return {DARKLY , TOTAL_DARKNESS}
-     */
-
-    public int setCurrentState() {
-
-        this.setChanged();
-        this.notifyObservers();
-        return currentState;
-    }
 
     /**
      * Default Constructor.
@@ -120,44 +105,61 @@ public class LuminosityManager extends Observable implements Observer {
      * @param reading the new reading.
      */
     public void addReading(Message.NodeReadings.Reading reading) {
-        //interested only in lockScreen events
+
+        double sum = 0;
+
+
+        //interested only in light events
 
         if ("urn:wisebed:node:capability:light".equals(reading.getCapability())) {       //urn:wisebed:ctitestbed:node:capability:light
 
             LOGGER.info("New Reading for Light Capability");
 
-            //update the state
-            states.put(reading.getNode(), reading.getDoubleReading());
             LatestLightReading = reading.getDoubleReading();
 
-            //calculate te current Status FSM
+            luminosityReadings.remove();
+            luminosityReadings.add(reading.getDoubleReading());
+
+            LOGGER.info(luminosityReadings.toString());
+
+            for (Object d : luminosityReadings.toArray()) {
+
+                sum += (Double) d;
+            }
+
+            LOGGER.info("Sum : " + sum );
+
+            Median =  sum / WINDOW;
+
+            LOGGER.info("Median : " + Median);
 
             updateLum1Threshold();
             updateLum2Threshold();
 
+            //calculate te current Status FSM
             updateStatus();
         }
     }
 
     /**
-     * Checks for the Status of lockScreen in a FOI.
+     * Checks for the Status of Luminosity in a FOI.
      *
-     * @return true if the FOIs screen is locked , false if unlocked
+     * @return void
      */
     private void updateStatus() {
+                                                     //           illumination         illumination2
+        //FSM                                                     lumThreshold1    <   lumThreshold2
+        //BRIGHT-->DARKLY-->TOTAL_DARKNESS            //    0-----------|----------------|
 
-        //FSM
-        //BRIGHT-->DARKLY-->TOTAL_DARKNESS
-
-        if ( lumThreshold1 < LatestLightReading && LatestLightReading < lumThreshold2 ) {
+        if ( Median > lumThreshold1 && LatestLightReading < lumThreshold2 ) {
 
             setCurrentState(DARKLY);
 
-        } else if(LatestLightReading < lumThreshold2) {
+        } else if(Median < lumThreshold1) {
 
             setCurrentState(TOTAL_DARKNESS);
 
-        } else if(LatestLightReading > lumThreshold1){
+        } else if(Median > lumThreshold2){
 
             setCurrentState(BRIGHT);
 
@@ -168,9 +170,9 @@ public class LuminosityManager extends Observable implements Observer {
 
 
     /**
-     * Updates and Returns the current state of the operation.
+     * Sets the current state of the operation.
      *
-     * @return {SCREEN_LOCKED , UNOLOKED}
+     * @return void
      */
 
     public void setCurrentState(int newState) {
@@ -259,7 +261,6 @@ public class LuminosityManager extends Observable implements Observer {
      * Reset the internal state.
      */
     public void reset() {
-        this.states = new HashMap<String, Double>();
         initLum();
         updateLum1Threshold();
         updateLum2Threshold();
