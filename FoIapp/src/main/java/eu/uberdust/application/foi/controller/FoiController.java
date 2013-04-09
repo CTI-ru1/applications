@@ -30,9 +30,6 @@ public final class FoiController implements Observer {
 
     private long lockscreenDelay;
 
-    public long getLockscreenDelay() {
-        return lockscreenDelay;
-    }
 
     /**
      * Pir timer.
@@ -122,7 +119,7 @@ public final class FoiController implements Observer {
 
             WSReadingsClient.getInstance().addObserver(PresenceManageR.getInstance());
 
-        } else if ("ichatzWorkstation".equals(MainApp.MODE) || "ichatzRoom".equals(MainApp.MODE)) {
+        } else if ("ichatzWorkstation".equals(MainApp.MODE) || "ichatzRoom".equals(MainApp.MODE) || "ichatz".equals(MainApp.MODE)) {
 
             //Subscription for notifications.
             LockManager.getInstance().addObserver(this);
@@ -194,7 +191,11 @@ public final class FoiController implements Observer {
             if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS){
 
                 timer.schedule(new TurnOffTask_2(timer), lockscreenDelay);
-                WorkstationZoneManager.getInstance().switchOffFirst();
+
+                if(!WorkstationZoneManager.getInstance().isSingleZone()){
+
+                    WorkstationZoneManager.getInstance().switchOffFirst();
+                }
 
             }else if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY){
 
@@ -211,16 +212,16 @@ public final class FoiController implements Observer {
 
         if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
 
-            if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {     //Median < LUM_THRESHOLD_1 && lastLumReading > LUM_THRESHOLD_2
+            if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {
 
                 WorkstationZoneManager.getInstance().switchOnFirst();
-                WorkstationZoneManager.getInstance().switchLastOff();
+                WorkstationZoneManager.getInstance().switchOffSecond();
 
-            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS) {   //Median < LUM_THRESHOLD_2
+            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS) {
 
-                WorkstationZoneManager.getInstance().switchOnAll();
+                WorkstationZoneManager.getInstance().switchOnFirstTwo();
 
-            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT) {                //Median > LUM_THRESHOLD_1
+            } else if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT) {
 
                 WorkstationZoneManager.getInstance().switchOffAll();
 
@@ -296,7 +297,7 @@ public final class FoiController implements Observer {
 
 
 
-                    WorkstationZoneManager.getInstance().switchOffFirst();
+                    WorkstationZoneManager.getInstance().switchOffSecond();
 
                 }
 
@@ -312,10 +313,10 @@ public final class FoiController implements Observer {
                         WorkstationZoneManager.getInstance().switchLastOff();
                         break;
                     case PresenceManageR.NEW_ENTRY:
-                        WorkstationZoneManager.getInstance().switchOnFirst();
+                        WorkstationZoneManager.getInstance().switchOnSecond();
                         break;
                     case PresenceManageR.OCCUPIED:
-                        WorkstationZoneManager.getInstance().switchOnAll();
+                        WorkstationZoneManager.getInstance().switchOnLastTwo();
                         break;
                 }
 
@@ -348,6 +349,12 @@ public final class FoiController implements Observer {
             }else if(MainApp.MODE.equals("ichatzRoom")){
 
                 ichatzPresenceHandler();
+
+            } else if(MainApp.MODE.equals("ichatz")){
+
+                ichatzPresenceHandler();
+                ichatzWorkstationHandler();
+
             }
 
         }else if(o instanceof PresenceManageR){
@@ -363,6 +370,12 @@ public final class FoiController implements Observer {
             } else if(MainApp.MODE.equals("SingleLightPir")){
 
                 SingleLightPirHandler();
+
+            } else if(MainApp.MODE.equals("ichatz")){
+
+                ichatzPresenceHandler();
+                ichatzWorkstationHandler();
+
             }
 
 
@@ -383,6 +396,12 @@ public final class FoiController implements Observer {
             } else if(MainApp.MODE.equals("SingleLightPir")){
 
                 SingleLightPirHandler();
+
+            } else if(MainApp.MODE.equals("ichatz")){
+
+                ichatzPresenceHandler();
+                ichatzWorkstationHandler();
+
             }
 
         }

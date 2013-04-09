@@ -96,8 +96,8 @@ public class WorkstationZoneManager {
     public boolean isSingleZone() {
 
         if(zones.size() > 1)
-            return true;
-        else return false;
+            return false;
+        else return true;
 
 
     }
@@ -173,6 +173,58 @@ public class WorkstationZoneManager {
         }
     }
 
+    /**
+     * Switches on first two Light-Levels.
+     */
+    public void switchOnFirstTwo() {
+
+        zones.get(0).setOn();
+        zones.get(1).setOn();
+    }
+
+    /**
+     * Switches off first two Light-Levels.
+     */
+    public void switchOffFirstTwo() {
+
+        zones.get(0).setOff();
+        zones.get(1).setOff();
+    }
+
+    /**
+     * Switches on first two Light-Levels.
+     */
+    public void switchOnSecond() {
+
+        zones.get(1).setOn();
+    }
+
+    /**
+     * Switches off first two Light-Levels.
+     */
+    public void switchOffSecond() {
+
+        zones.get(1).setOff();
+    }
+
+
+    /**
+     * Switches on first two Light-Levels.
+     */
+    public void switchOnLastTwo() {
+
+        zones.get(1).setOn();
+        zones.get(2).setOn();
+    }
+
+    /**
+     * Switches off first two Light-Levels.
+     */
+    public void switchOffLastTwo() {
+
+        zones.get(1).setOff();
+        zones.get(2).setOff();
+    }
 
 
     /**

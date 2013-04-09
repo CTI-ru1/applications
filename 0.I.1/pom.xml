@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>uberdust</groupId>
+            <artifactId>UberdustInterface</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>uberdust</groupId>
             <artifactId>WebSocketsLibrary</artifactId>
             <version>1.0</version>
         </dependency>

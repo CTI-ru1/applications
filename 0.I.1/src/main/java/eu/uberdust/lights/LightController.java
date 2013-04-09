@@ -3,6 +3,7 @@ package eu.uberdust.lights;
 import ch.ethz.inf.vs.californium.coap.CodeRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import eu.uberdust.MainApp;
+import eu.uberdust.communication.UberdustClient;
 import eu.uberdust.communication.rest.Converter;
 import eu.uberdust.communication.rest.RestClient;
 import eu.uberdust.communication.websocket.readings.WSReadingsClient;
@@ -90,11 +91,10 @@ public final class LightController {
         LOGGER.info("Light Controller initialized");
         timer = new Timer();
 
-        //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));
+        //setLastPirReading(Long.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_PIR_REST).split("\t")[0]));RestClient.getInstance().callRestfulWebService("http://uberdust.cti.gr/rest/testbed/1/node/urn:wisebed:ctitestbed:black/capability/urn:wisebed:node:capability:lockScreen/html/limit/1").split("\t")[1]) == 1)
         setLum(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_READINGS_REST));
         setLastLumReading(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_LIGHT_EXT_REST).split("\t")[1]));
         setScreenLocked((Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 1)||(Double.valueOf(RestClient.getInstance().callRestfulWebService(MainApp.SENSOR_SCREENLOCK_REST).split("\t")[1]) == 3));
-
 
         LOGGER.info("lastLumReading -- " + lastLumReading);
         LOGGER.info("isScreenLocked -- " + isScreenLocked);
@@ -323,40 +323,8 @@ public final class LightController {
         } else {
             zone3 = value;
         }
-        
-        /*final String zonef;
-        
-        if(zone == -1){zonef = "ff";}
-        else{zonef = ""+zone;}
 
-        final String link = new StringBuilder(MainApp.LIGHT_CONTROLLER).append(zonef).append(",").append(value ? 1 : 0).toString();*/
-
-        Request request = new Request(CodeRegistry.METHOD_POST, false);
-        request.setURI("/lz"+zone);
-        request.setPayload(value ? "1" : "0");
-        request.toByteArray();
-        final StringBuilder linkBuilder = new StringBuilder("http://uberdust.cti.gr/rest/sendCommand/destination/urn:wisebed:ctitestbed:0x99c/payload/7f,69,70,33");
-
-        int[] bytes = Converter.getInstance().ByteToInt(request.toByteArray());
-        for (int aByte : bytes) {
-            linkBuilder.append(",").append(Integer.toHexString(aByte));
-        }
-
-        LOGGER.info(linkBuilder.toString());
-        try {
-            restCall(linkBuilder.toString());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public synchronized void restCall(final String link) throws InterruptedException {
-
-        for (int i = 0; i < MAX_TRIES; i++) {
-            RestClient.getInstance().callRestfulWebService(link);
-            Thread.sleep(500);
-        }
-
+        UberdustClient.getInstance().sendCoapPost("2df", "lz" + zone, value ? "1" : "0"); //FOI_ACTUATOR
     }
 
     public static void main(final String[] args) {
