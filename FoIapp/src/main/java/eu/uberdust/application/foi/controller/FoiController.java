@@ -163,7 +163,7 @@ public final class FoiController implements Observer {
     public void WorkstationHandler(){
 
 
-        if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
+        if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED || LockManager.getInstance().getCurrentState() == LockManager.WORKSTATION_START_SESSION) {
 
             if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {
 
@@ -186,7 +186,7 @@ public final class FoiController implements Observer {
                 WorkstationZoneManager.getInstance().switchOffAll();
 
             }
-        } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+        } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED || LockManager.getInstance().getCurrentState() == LockManager.WORKSTATION_END_SESSION) {
 
             if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS){
 
@@ -210,7 +210,7 @@ public final class FoiController implements Observer {
 
     public void ichatzWorkstationHandler(){
 
-        if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
+        if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED || LockManager.getInstance().getCurrentState() == LockManager.WORKSTATION_START_SESSION) {
 
             if (LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY) {
 
@@ -226,7 +226,7 @@ public final class FoiController implements Observer {
                 WorkstationZoneManager.getInstance().switchOffAll();
 
             }
-        } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+        } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED || LockManager.getInstance().getCurrentState() == LockManager.WORKSTATION_END_SESSION) {
 
             if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS){
 
@@ -291,7 +291,7 @@ public final class FoiController implements Observer {
 
         } else {
 
-            if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED) {
+            if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_UNLOCKED || LockManager.getInstance().getCurrentState() == LockManager.WORKSTATION_START_SESSION) {
 
                 if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY){
 
@@ -303,7 +303,7 @@ public final class FoiController implements Observer {
 
                 SingleLightPir();
 
-            } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED) {
+            } else if (LockManager.getInstance().getCurrentState() == LockManager.SCREEN_LOCKED || LockManager.getInstance().getCurrentState() == LockManager.WORKSTATION_END_SESSION) {
 
                 switch (PresenceManageR.getInstance().getCurrentState()) {
                     case PresenceManageR.EMPTY:

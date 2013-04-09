@@ -46,7 +46,7 @@ public class TurnOffTask_2 extends TimerTask {
 
        ScreenState = LockManager.getInstance().getCurrentState();
 
-        if (ScreenState == LockManager.SCREEN_LOCKED) {
+        if (ScreenState == LockManager.SCREEN_LOCKED || ScreenState == LockManager.WORKSTATION_END_SESSION) {
                 LOGGER.info("TurnOffTask_2: Turn off All lights " );
            if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.DARKLY){
 
