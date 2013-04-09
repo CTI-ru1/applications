@@ -54,7 +54,7 @@ public class TurnOffTask_2 extends TimerTask {
 
            } else if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS){
 
-             if(WorkstationZoneManager.getInstance().isSingleZone()){
+             if(!WorkstationZoneManager.getInstance().isSingleZone()){
 
                  WorkstationZoneManager.getInstance().switchOffSecond();
 
