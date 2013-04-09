@@ -151,7 +151,7 @@ public class LuminosityManager extends Observable implements Observer {
         //FSM                                                     lumThreshold1    <   lumThreshold2
         //BRIGHT-->DARKLY-->TOTAL_DARKNESS            //    0-----------|----------------|
 
-        if ( Median > lumThreshold1 && LatestLightReading < lumThreshold2 ) {
+        if ( Median > lumThreshold1 &&  Median < lumThreshold2 ) {                //LatestLightReading
 
             setCurrentState(DARKLY);
 
