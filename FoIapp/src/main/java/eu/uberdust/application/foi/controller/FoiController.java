@@ -331,6 +331,11 @@ public final class FoiController implements Observer {
                 LuminosityManager.getInstance().getCurrentState() == LuminosityManager.TOTAL_DARKNESS) {
 
             SingleLightPir();
+
+        } else if(LuminosityManager.getInstance().getCurrentState() == LuminosityManager.BRIGHT){
+
+            WorkstationZoneManager.getInstance().switchOffAll();
+
         }
 
     }
