@@ -9,17 +9,16 @@
 
     <modules>
         <!--<module>0.I.11</module>-->
-        <module>0.I.11WS</module>
-        <module>0.I.1</module>
-        <module>0.I.2</module>
-        <module>0.I.3</module>
-        <module>0.I.9-3</module>
-        <module>TraceParser</module>
-        <module>EvaluationApp</module>
+        <!--<module>0.I.11WS</module>-->
+        <!--<module>0.I.1</module>-->
+        <!--<module>0.I.2</module>-->
+        <!--<module>0.I.3</module>-->
+        <!--<module>0.I.9-3</module>-->
+        <!--<module>TraceParser</module>-->
+        <!--<module>EvaluationApp</module>-->
         <module>listenerWS</module>
-        <module>VirtualEntityManager</module>
-        <module>SparqlManager</module>
         <module>FoIapp</module>
+        <module>IntelenDataParser</module>
     </modules>
 
     <name>Applications</name>
@@ -99,6 +98,19 @@
         </plugins>
     </reporting>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <pluginRepositories>
         <pluginRepository>
